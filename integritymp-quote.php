@@ -24,3 +24,4 @@ defined('IMQ_PLUGIN_DIR_URL') || define('IMQ_PLUGIN_DIR_URL', plugin_dir_url(__F
 
 // Load plugin classes
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-customer-account.php';
+require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-imq-product.php';
