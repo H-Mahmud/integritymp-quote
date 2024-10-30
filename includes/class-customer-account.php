@@ -31,6 +31,20 @@ class Integrity_Mp_Quote_Customer_Account
         add_action('edit_user_profile',  array($this, 'show_custom_user_profile_fields'), 10, 1);
         add_action('personal_options_update', array($this, 'save_custom_user_profile_fields'), 10, 1);
         add_action('edit_user_profile_update', array($this, 'save_custom_user_profile_fields'), 10, 1);
+
+        add_filter('manage_users_columns', array($this, 'add_users_verification_column'), 10, 1);
+        add_filter('manage_users_sortable_columns', array($this, 'user_verification_column_sortable'), 10, 1);
+        // add_action('restrict_manage_users', array($this, 'user_filter_by_verification'), 10, 1);
+        add_filter('pre_get_users', array($this, 'filter_users_by_verification'), 10, 1);
+        add_action('manage_users_custom_column', array($this,  'show_verification_status'), 10, 3);
+        add_action('admin_head', array($this, 'custom_user_status_badge_styles'));
+        add_action('admin_menu', array($this, 'add_unverified_count_badge'));
+
+        add_action('user_register', array($this, 'add_default_verification_status'), 10, 1);
+        add_action('show_user_profile', array($this, 'add_verification_status_field'), 10, 1);
+        add_action('edit_user_profile', array($this, 'add_verification_status_field'), 10, 1);
+        add_action('personal_options_update', array($this, 'save_verification_status'), 10, 1);
+        add_action('edit_user_profile_update', array($this, 'save_verification_status'), 10, 1);
     }
 
 
@@ -222,7 +236,7 @@ class Integrity_Mp_Quote_Customer_Account
                 <td><input type="text" name="phone" id="phone" value="<?php echo esc_attr(get_the_author_meta('phone', $user->ID)); ?>" class="regular-text" /></td>
             </tr>
         </table>
-<?php
+    <?php
     }
 
 
@@ -252,6 +266,263 @@ class Integrity_Mp_Quote_Customer_Account
         }
         if (!empty($_POST['phone'])) {
             update_user_meta($user_id, 'phone', sanitize_text_field($_POST['phone']));
+        }
+    }
+
+
+
+    /**
+     * Adds a new column to the Users table to display verification status.
+     *
+     * @param array $columns The existing columns in the Users table.
+     *
+     * @return array The modified columns array with the new column added.
+     */
+    public function add_users_verification_column($columns)
+    {
+        $columns['verification_status'] = 'Verification Status';
+        return $columns;
+    }
+
+
+
+    /**
+     * Make verification status column sortable.
+     *
+     * @param array $columns
+     *
+     * @return array
+     */
+    public function user_verification_column_sortable($columns)
+    {
+        $columns['verification_status'] = 'verification_status';
+        return $columns;
+    }
+
+
+
+    /**
+     * Adds a dropdown filter for verification status on the user management page.
+     *
+     * This function outputs a select dropdown with options for filtering users by their
+     * verification status ('unverified', 'verified', 'rejected'). It checks if a filter
+     * is applied via a GET request and sets the selected option accordingly.
+     *
+     * @param string $which The location of the extra table nav markup: 'top' or 'bottom'.
+     */
+    public function user_filter_by_verification($which)
+    {
+        $status = array('unverified', 'verified', 'rejected');
+        if (isset($_GET['verification_status']) && in_array($_GET['verification_status'], $status)) {
+            $selected = $_GET['verification_status'];
+        } else {
+            $selected = 'all';
+        }
+
+    ?>
+        <select name="verification_status">
+            <option value="" <?php selected('all', $selected); ?>><?php _e('All Verification Statuses', 'integritymp-quote'); ?></option>
+            <option value="unverified" <?php selected('unverified', $selected); ?>>Unverified</option>
+            <option value="verified" <?php selected('verified', $selected); ?>>Verified</option>
+            <option value="rejected" <?php selected('rejected', $selected); ?>>Rejected</option>
+        </select>
+    <?php
+    }
+
+
+
+    /**
+     * Filters users by their verification status in the admin user management page.
+     *
+     * This function modifies the user query to filter users based on the 'verification_status'
+     * passed via a GET request. It checks if the current page is 'users.php' and a valid
+     * 'verification_status' parameter is set in the URL, then adds the corresponding
+     * meta query to the user query.
+     *
+     * @param WP_User_Query $query The WP_User_Query object to modify.
+     */
+    public function filter_users_by_verification($query)
+    {
+        global $pagenow;
+
+        if (is_admin() && 'users.php' == $pagenow && isset($_GET['verification_status']) && $_GET['verification_status'] != '') {
+            $query->query_vars['meta_key'] = 'verification_status';
+            $query->query_vars['meta_value'] = $_GET['verification_status'];
+        }
+    }
+
+
+
+    /**
+     * Displays a badge with the user's verification status in the admin user table.
+     *
+     * This function is hooked to the 'manage_users_custom_column' action to render
+     * a status badge for the 'verification_status' column in the users list table.
+     * It retrieves the user's verification status from user meta and returns an
+     * HTML span element with a class and text representing the status.
+     *
+     * @param string $value       The column's current value.
+     * @param string $column_name The name of the column being processed.
+     * @param int    $user_id     The ID of the user being displayed.
+     *
+     * @return string The HTML for the status badge or the original column value.
+     */
+    function show_verification_status($value, $column_name, $user_id)
+    {
+        if ('verification_status' == $column_name) {
+            $status = get_user_meta($user_id, 'verification_status', true);
+
+            // Define badge classes for each status
+            $badge_class = 'status-badge ';
+            switch ($status) {
+                case 'verified':
+                    $badge_class .= 'status-verified';
+                    break;
+                case 'unverified':
+                    $badge_class .= 'status-unverified';
+                    break;
+                case 'rejected':
+                    $badge_class .= 'status-rejected';
+                    break;
+                default:
+                    $badge_class .= 'status-unverified';
+                    break;
+            }
+
+            return '<span class="' . esc_attr($badge_class) . '">' . ucfirst($status) . '</span>';
+        }
+        return $value;
+    }
+
+
+
+    /**
+     * Outputs custom CSS styles for user status badges.
+     *
+     * This function echoes a style block containing CSS definitions for
+     * the 'status-badge' class and specific styles for badges representing
+     * user verification statuses ('verified', 'unverified', 'rejected').
+     * The styles include display, padding, font size, weight, and background
+     * colors for each status type, ensuring the badges are visually distinct
+     * in the admin interface.
+     */
+    function custom_user_status_badge_styles()
+    {
+        echo '<style>
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            border-radius: 4px;
+            text-transform: capitalize;
+        }
+        .status-verified {
+            background-color: #28a745; /* Green */
+        }
+        .status-unverified {
+            background-color: #6c757d; /* Gray */
+        }
+        .status-rejected {
+            background-color: #dc3545; /* Red */
+        }
+    </style>';
+    }
+
+
+
+    /**
+     * Adds a badge with the count of unverified users to the WordPress admin menu.
+     *
+     * This function iterates over the global WordPress admin menu and appends
+     * a notification badge to the "Users" menu item, displaying the number of
+     * users with an 'unverified' status. This provides a quick visual indicator
+     * of pending user verifications.
+     */
+    public function add_unverified_count_badge()
+    {
+        global $menu;
+
+        $count = count(get_users([
+            'meta_key' => 'verification_status',
+            'meta_value' => 'unverified'
+        ]));
+
+        foreach ($menu as $key => $value) {
+            if ($menu[$key][2] == 'users.php') {
+                $menu[$key][0] .= sprintf(' <span class="awaiting-mod">%d</span>', $count);
+                break;
+            }
+        }
+    }
+
+
+
+
+    /**
+     * Sets the default verification status for a newly registered user.
+     *
+     * This function is attached to the 'user_register' action hook and sets the
+     * default verification status for a user to 'unverified' upon registration.
+     *
+     * @param int $user_id The ID of the newly registered user.
+     */
+    function add_default_verification_status($user_id)
+    {
+        add_user_meta($user_id, 'verification_status', 'unverified', true);
+    }
+
+
+
+    /**
+     * Adds a verification status field to the user profile page.
+     *
+     * This function outputs a dropdown field on the WordPress user profile
+     * page allowing administrators to select a user's verification status.
+     * The options include 'Unverified', 'Verified', and 'Rejected'. It checks
+     * if the current user has the capability to manage options before proceeding.
+     *
+     * @param WP_User $user The user object of the profile being edited.
+     */
+    public function add_verification_status_field($user)
+    {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
+        $status = get_user_meta($user->ID, 'verification_status', true);
+    ?>
+        <h3><?php _e('Verification Status', 'integritymp-qoute'); ?></h3>
+        <table class="form-table">
+            <tr>
+                <th><label for="verification_status"><?php _e('Status', 'textdomain'); ?></label></th>
+                <td>
+                    <select name="verification_status" id="verification_status">
+                        <option value="unverified" <?php selected($status, 'unverified'); ?>>Unverified</option>
+                        <option value="verified" <?php selected($status, 'verified'); ?>>Verified</option>
+                        <option value="rejected" <?php selected($status, 'rejected'); ?>>Rejected</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+<?php
+    }
+
+
+
+    /**
+     * Saves the verification status for a user.
+     *
+     * This function updates the user's verification status in the user meta data,
+     * allowing administrators to set the status to 'verified', 'unverified', or 'rejected'.
+     *
+     * @param int $user_id The ID of the user whose verification status is being updated.
+     */
+    public function save_verification_status($user_id)
+    {
+        if (current_user_can('manage_options') && isset($_POST['verification_status'])) {
+            update_user_meta($user_id, 'verification_status', $_POST['verification_status']);
         }
     }
 
