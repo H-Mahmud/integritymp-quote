@@ -45,6 +45,9 @@ class Integrity_Mp_Quote_Customer_Account
         add_action('edit_user_profile', array($this, 'add_verification_status_field'), 10, 1);
         add_action('personal_options_update', array($this, 'save_verification_status'), 10, 1);
         add_action('edit_user_profile_update', array($this, 'save_verification_status'), 10, 1);
+
+        add_action('template_redirect',  array($this, 'apply_woocommerce_restrictions'));
+        add_action('woocommerce_product_query', array($this, 'hide_woocommerce_categories'), 10, 1);
     }
 
 
@@ -523,6 +526,70 @@ class Integrity_Mp_Quote_Customer_Account
     {
         if (current_user_can('manage_options') && isset($_POST['verification_status'])) {
             update_user_meta($user_id, 'verification_status', $_POST['verification_status']);
+        }
+    }
+
+
+
+    /**
+     * Restricts access to the WooCommerce store to users whose verification status is set to 'verified'.
+     *
+     * If the user is not logged in, redirects to the login page. If the user is logged in but not verified, redirects to a custom 'not-verified' page.
+     *
+     * This function is an action hook for the 'init' action.
+     */
+    public function restrict_woocommerce_to_verified_users()
+    {
+        if (!is_user_logged_in()) {
+            wp_redirect(get_permalink(wc_get_page_id('myaccount')));
+            exit;
+        }
+
+        $user_id = get_current_user_id();
+        $verification_status = get_user_meta($user_id, 'verification_status', true);
+
+        if ($verification_status !== 'verified') {
+            wp_redirect(home_url('/not-verified'));
+            exit;
+        }
+    }
+
+    /**
+     * Applies restrictions on WooCommerce pages to ensure only verified users have access.
+     *
+     * This function checks if the current page is a WooCommerce-related page such as shop, product category, cart, checkout,
+     * or a custom 'complete-quote' page. If so, it calls the restriction function to verify user access.
+     *
+     * The function is hooked to the 'template_redirect' action to execute during the template redirect phase.
+     */
+    public function apply_woocommerce_restrictions()
+    {
+        if (is_shop() || is_product_category() || is_product() || is_cart() || is_checkout() || is_page('complete-quote')) {
+            $this->restrict_woocommerce_to_verified_users();
+        }
+    }
+
+
+
+    /**
+     * Hides WooCommerce categories from non-verified users.
+     *
+     * This function hooks into the `woocommerce_product_query` action to modify the query for WooCommerce categories.
+     * It checks if the current user is not an administrator and if the current page is a WooCommerce-related page such as
+     * shop, product category, or product. If so, it verifies the user's verification status and if not 'verified', sets the
+     * query to return no results.
+     *
+     * @param WP_Query $query The query object.
+     */
+    public function hide_woocommerce_categories($query)
+    {
+        if (!is_admin() && (is_shop() || is_product_category() || is_product()) && !current_user_can('manage_options')) {
+            $user_id = get_current_user_id();
+            $verification_status = get_user_meta($user_id, 'verification_status', true);
+
+            if ($verification_status !== 'verified') {
+                $query->set('post__in', array(0));
+            }
         }
     }
 
