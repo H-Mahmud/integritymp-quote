@@ -28,6 +28,9 @@ class Integrity_Mp_Quote_Product
             remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
         });
         add_action('woocommerce_proceed_to_checkout', array($this, 'cart_page_complete_quote_button'), 20);
+
+        add_action('woocommerce_product_options_pricing', array($this, 'add_custom_price_fields'), 10);
+        add_action('woocommerce_process_product_meta', array($this, 'save_custom_price_fields'), 10, 1);
     }
 
 
@@ -70,6 +73,63 @@ class Integrity_Mp_Quote_Product
         </a>
 <?php
     }
+
+
+
+    /**
+     * Adds custom price fields to the WooCommerce product options
+     *
+     * Adds three text inputs for prices to the pricing options area of the product
+     * options page. The IDs of the inputs are '_price_level_1', '_price_level_2', and
+     * '_cost', and the labels are 'Price Level 1', 'Price Level 2', and 'Cost',
+     * respectively.
+     */
+    public function add_custom_price_fields()
+    {
+        woocommerce_wp_text_input([
+            'id' => '_price_level_1',
+            'label' => __('Price Level 1', 'integritymp-quote'),
+            'data_type' => 'price',
+        ]);
+
+        woocommerce_wp_text_input([
+            'id' => '_price_level_2',
+            'label' => __('Price Level 2', 'integritymp-quote'),
+            'data_type' => 'price',
+        ]);
+
+        woocommerce_wp_text_input([
+            'id' => '_cost',
+            'label' => __('Cost', 'integritymp-quote'),
+            'data_type' => 'price',
+        ]);
+    }
+
+
+
+    /**
+     * Saves the custom price fields from the product options page to the database.
+     *
+     * When the user saves the product, the custom price fields are saved to the
+     * database as post meta fields. The IDs of the fields are '_price_level_1',
+     * '_price_level_2', and '_cost', and the values are the input values provided
+     * by the user.
+     *
+     * @param int $post_id The ID of the post being saved.
+     */
+    public function save_custom_price_fields($post_id)
+    {
+        if (isset($_POST['_price_level_1'])) {
+            update_post_meta($post_id, '_price_level_1', sanitize_text_field($_POST['_price_level_1']));
+        }
+        if (isset($_POST['_price_level_2'])) {
+            update_post_meta($post_id, '_price_level_2', sanitize_text_field($_POST['_price_level_2']));
+        }
+        if (isset($_POST['_cost'])) {
+            update_post_meta($post_id, '_cost', sanitize_text_field($_POST['_cost']));
+        }
+    }
+
 
 
     /**
