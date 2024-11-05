@@ -22,6 +22,12 @@ class Integrity_Mp_Quote
     private final function __construct()
     {
         add_action('init', array($this, 'register_quote_post_type'), 20);
+
+        add_action('init', array(self::class, 'add_quotes_endpoint'));
+        add_action('init', array(self::class, 'add_view_quote_endpoint'));
+        add_filter('woocommerce_account_menu_items', array($this, 'add_quotes_link_my_account'));
+        add_action('woocommerce_account_quotes_endpoint', array($this, 'my_account_quotes_content'));
+        add_action('woocommerce_account_view-quote_endpoint', array($this, 'my_account_view_quote_content'));
     }
 
 
@@ -61,6 +67,82 @@ class Integrity_Mp_Quote
             'show_in_admin_bar'   => true,
             'rewrite'             => false,
         ));
+    }
+
+
+
+    /**
+     * Adds a "Quotes" link to the My Account menu.
+     *
+     * @param array $items The menu items to be modified.
+     * @return array The modified menu items.
+     */
+    public function add_quotes_link_my_account($items)
+    {
+        $new_items = array();
+        foreach ($items as $key => $value) {
+            $new_items[$key] = $value;
+            if ('orders' === $key) {
+                $new_items['quotes'] = __('Quotes', 'integritymp-quote');
+            }
+        }
+        return $new_items;
+    }
+
+
+
+    /**
+     * Outputs the content for the "Quotes" page in the My Account section.
+     *
+     * @action woocommerce_account_quotes_endpoint
+     */
+    public function my_account_quotes_content()
+    {
+        include_once IMQ_PLUGIN_DIR_PATH . 'view/my-account-quotes.php';
+    }
+
+
+
+    /**
+     * Outputs the content for the "View Quote" page in the My Account section.
+     *
+     * This function is hooked to the 'woocommerce_account_view-quote_endpoint' action hook.
+     *
+     * @since 1.0
+     */
+
+    public function my_account_view_quote_content()
+    {
+        include_once IMQ_PLUGIN_DIR_PATH . 'view/my-account-view-quote.php';
+    }
+
+
+
+
+    /**
+     * Registers the 'quotes' endpoint, which is used for displaying all quotes in the My Account section.
+     *
+     * This function is hooked to the 'init' action hook.
+     *
+     * @since 1.0
+     */
+    public static function add_quotes_endpoint()
+    {
+        add_rewrite_endpoint('quotes', EP_ROOT | EP_PAGES);
+    }
+
+
+
+    /**
+     * Registers the 'view-quote' endpoint, which is used for displaying a single quote in the My Account section.
+     *
+     * This function is hooked to the 'init' action hook.
+     *
+     * @since 1.0
+     */
+    public static function add_view_quote_endpoint()
+    {
+        add_rewrite_endpoint('view-quote', EP_ROOT | EP_PAGES);
     }
 
 
