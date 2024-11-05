@@ -19,9 +19,11 @@
 defined('ABSPATH') || exit;
 
 // Plugin constants
+defined('IMQ_PLUGIN_FILE') || define('IMQ_PLUGIN_FILE', __FILE__);
 defined('IMQ_PLUGIN_DIR_PATH') || define('IMQ_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
 defined('IMQ_PLUGIN_DIR_URL') || define('IMQ_PLUGIN_DIR_URL', plugin_dir_url(__FILE__));
 
-// Load plugin classes
+// Load plugin classes & dependencies
+require_once IMQ_PLUGIN_DIR_PATH . 'init.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-customer-account.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-imq-product.php';
