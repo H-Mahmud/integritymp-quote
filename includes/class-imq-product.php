@@ -31,6 +31,10 @@ class Integrity_Mp_Quote_Product
 
         add_action('woocommerce_product_options_pricing', array($this, 'add_custom_price_fields'), 10);
         add_action('woocommerce_process_product_meta', array($this, 'save_custom_price_fields'), 10, 1);
+
+        add_action('woocommerce_product_import_inserted_product_object', array($this, 'save_imported_custom_fields'), 10, 2);
+        add_filter('woocommerce_csv_product_import_mapping_options', array($this, 'add_custom_fields_to_csv_mapping'));
+        add_filter('woocommerce_csv_product_import_mapping_default_columns', array($this, 'set_default_csv_mapping_for_custom_fields'));
     }
 
 
@@ -128,6 +132,92 @@ class Integrity_Mp_Quote_Product
         if (isset($_POST['_cost'])) {
             update_post_meta($post_id, '_cost', sanitize_text_field($_POST['_cost']));
         }
+    }
+
+
+
+    /**
+     * Saves custom price fields imported from a CSV file to the database.
+     *
+     * When a product is imported from a CSV file, this function is called to
+     * save the custom price fields to the database as post meta fields. The
+     * IDs of the fields are '_price_level_1', '_price_level_2', and '_cost',
+     * and the values are the input values provided by the user in the CSV file.
+     *
+     * @param WC_Product $object The product object being imported.
+     * @param array $data The data from the CSV file being imported.
+     */
+    public function save_imported_custom_fields($object, $data)
+    {
+        if (!empty($data['_price_level_1']))
+            update_post_meta($object->get_id(), '_price_level_1', $data['_price_level_1']);
+
+        if (!empty($data['_price_level_2']))
+            update_post_meta($object->get_id(), '_price_level_2', $data['_price_level_2']);
+
+        if (!empty($data['_cost']))
+            update_post_meta($object->get_id(), '_cost', $data['_cost']);
+
+
+        if (!empty($data['vendor'])) {
+            $vendor_value = sanitize_text_field($data['vendor']);
+            $taxonomy_slug = 'vendor';
+            $taxonomy = 'pa_' . $taxonomy_slug;
+            $term_ids = array();
+            $term = get_term_by('name', $vendor_value, $taxonomy);
+            if ($term) {
+                $term_ids[] = (int) $term->term_id;
+            } else {
+                $result =  wp_insert_term($vendor_value, $taxonomy);
+                $term_ids[] =  $result['term_id'];
+            }
+
+            imq_assign_terms_to_product($object->get_id(), $taxonomy_slug, $term_ids);
+        }
+    }
+
+
+
+    /**
+     * Adds custom fields to the CSV mapping options for product import.
+     *
+     * This function extends the available mapping options for product import by
+     * adding custom fields. Specifically, it adds three price level fields and a
+     * vendor field to the CSV mapping options.
+     *
+     * @param array $options The existing CSV mapping options.
+     * @return array The modified CSV mapping options including custom fields.
+     */
+    public function add_custom_fields_to_csv_mapping($options)
+    {
+        $options['price']['options']['_price_level_1'] = 'Price Level 1';
+        $options['price']['options']['_price_level_2'] = 'Price Level 2';
+        $options['price']['options']['_cost'] = 'Cost';
+
+        $options['vendor'] = 'Vendor';
+        return $options;
+    }
+
+
+
+    /**
+     * Sets the default mapping for custom fields when importing products from a CSV file.
+     *
+     * This function takes an array of default column mappings and adds custom fields to it.
+     * The custom fields are 'Price Level 1', 'Price Level 2', 'Cost', and 'Vendor', which
+     * are mapped to the corresponding custom fields in the database.
+     *
+     * @param array $columns The existing default column mappings.
+     * @return array The modified default column mappings with custom fields added.
+     */
+    function set_default_csv_mapping_for_custom_fields($columns)
+    {
+        $columns['Price Level 1'] = '_price_level_1';
+        $columns['Price Level 2'] = '_price_level_2';
+        $columns['Cost'] = '_cost';
+
+        $columns['Vendor'] = 'vendor';
+        return $columns;
     }
 
 
