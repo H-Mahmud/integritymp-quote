@@ -22,6 +22,9 @@ class Integrity_Mp_Quote
     private final function __construct()
     {
         add_action('init', array($this, 'register_quote_post_type'), 20);
+        add_filter('post_row_actions', array($this, 'remove_quote_post_row_actions'), 10, 2);
+        add_filter('manage_shop_quote_posts_columns', array($this, 'wc_quote_custom_columns'));
+        add_action('manage_shop_quote_posts_custom_column', array($this,  'wc_quote_custom_column_data'), 20, 2);
 
         add_action('init', array(self::class, 'add_quotes_endpoint'));
         add_action('init', array(self::class, 'add_view_quote_endpoint'));
@@ -162,6 +165,93 @@ class Integrity_Mp_Quote
             $page_template = IMQ_PLUGIN_DIR_PATH . 'view/quote-invoice.php';
         }
         return $page_template;
+    }
+
+    /**
+     * Adds custom columns to the Quotes admin page
+     *
+     * @param array $columns The current columns array
+     * @return array The updated columns array
+     */
+    public function wc_quote_custom_columns($columns)
+    {
+        $columns = array(
+            'cb' => '<input type="checkbox" />',
+            'quote' => __('Quote', 'integritymp-quote'),
+            'status' => __('Status', 'integritymp-quote'),
+            'quote_total' => __('Quote Total', 'integritymp-quote'),
+            'date' => __('Date', 'integritymp-quote')
+        );
+        return $columns;
+    }
+
+
+
+    /**
+     * Handles custom column data for Quote post type
+     *
+     * @param string $column  The name of the column to display
+     * @param int    $post_id The current post ID
+     */
+
+    public function wc_quote_custom_column_data($column, $post_id)
+    {
+        switch ($column) {
+            case 'quote':
+                echo $this->get_quote_edit_link(get_the_ID());
+                break;
+            case 'status':
+                echo 'Status';
+                break;
+            case 'quote_total':
+                echo 'Quote total';
+                break;
+
+            case 'date':
+                echo get_the_date();
+                break;
+        }
+    }
+
+
+
+    /**
+     * Generates a link to edit a quote in the WordPress admin interface.
+     *
+     * @param int $quote_id The ID of the quote to generate a link for.
+     *
+     * @return string The edit link, with the quote ID and business name displayed.
+     */
+    public function get_quote_edit_link($quote_id)
+    {
+
+        $author_id = get_post_field('post_author', $quote_id);
+        $business_name = get_the_author_meta('business_name', $author_id);
+        $quote_tile = '#' . $quote_id . " " . $business_name;
+
+        $edit_link = admin_url('admin.php?page=shop-quote&action=edit&id=' . $quote_id);
+        return "<strong><a class='row-title' href='$edit_link'>$quote_tile</a></strong>";
+    }
+
+
+
+    /**
+     * Remove unwanted row actions for 'shop_quote' post type.
+     *
+     * @param array    $actions The list of row actions.
+     * @param \WP_Post $post    The post object.
+     *
+     * @return array
+     */
+    public function remove_quote_post_row_actions($actions, $post)
+    {
+        if ($post->post_type === 'shop_quote') {
+            unset($actions['edit']);
+            unset($actions['view']);
+            unset($actions['trash']);
+            unset($actions['inline hide-if-no-js']);
+        }
+        return $actions;
     }
 
 
