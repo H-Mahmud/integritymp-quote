@@ -28,6 +28,8 @@ class Integrity_Mp_Quote
         add_filter('woocommerce_account_menu_items', array($this, 'add_quotes_link_my_account'));
         add_action('woocommerce_account_quotes_endpoint', array($this, 'my_account_quotes_content'));
         add_action('woocommerce_account_view-quote_endpoint', array($this, 'my_account_view_quote_content'));
+
+        add_filter('page_template', array($this, 'complete_quote_page_template'));
     }
 
 
@@ -143,6 +145,23 @@ class Integrity_Mp_Quote
     public static function add_view_quote_endpoint()
     {
         add_rewrite_endpoint('view-quote', EP_ROOT | EP_PAGES);
+    }
+
+
+
+    /**
+     * Replaces the template for the "Complete Quote" page with our custom template.
+     *
+     * @param string $page_template The path to the template file.
+     *
+     * @return string The path to the template file.
+     */
+    public function complete_quote_page_template($page_template)
+    {
+        if (is_page('complete-quote')) {
+            $page_template = IMQ_PLUGIN_DIR_PATH . 'view/quote-invoice.php';
+        }
+        return $page_template;
     }
 
 
