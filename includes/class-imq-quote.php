@@ -32,6 +32,7 @@ class Integrity_Mp_Quote
         add_filter('woocommerce_account_menu_items', array($this, 'add_quotes_link_my_account'));
         add_action('woocommerce_account_quotes_endpoint', array($this, 'my_account_quotes_content'));
         add_action('woocommerce_account_view-quote_endpoint', array($this, 'my_account_view_quote_content'));
+        add_action('wp', array($this, 'get_quote_request'));
 
         add_filter('page_template', array($this, 'complete_quote_page_template'));
     }
@@ -291,6 +292,42 @@ class Integrity_Mp_Quote
     public function quote_submenu_page_content()
     {
         include_once IMQ_PLUGIN_DIR_PATH . 'view/admin-quote-edit.php';
+    }
+
+
+
+    /**
+     * Redirects the user to the complete quote page if they are logged in and on the
+     * cart page with the 'quote_request' query string parameter set to 'true', and
+     * if the cart is not empty.
+     *
+     * Called by the 'wp' action hook.
+     *
+     * @since 1.0
+     */
+    public function get_quote_request()
+    {
+
+        if (!is_user_logged_in() || is_admin() || !isset($_GET['quote_request']) || $_GET['quote_request'] != 'true') return;
+        if (WC()->cart->get_cart_contents_count() <= 0) {
+            wc_add_notice('The cart is empty. Please add some products.', 'error');
+
+            wp_redirect(wc_get_cart_url());
+            exit;
+        }
+
+        $cart_items = WC()->cart->get_cart();
+
+        foreach ($cart_items as $cart_item_key => $cart_item) {
+            $product_id = $cart_item['product_id'];
+            $product_name = $cart_item['data']->get_name();
+            $quantity = $cart_item['quantity'];
+        }
+
+        WC()->cart->empty_cart();
+
+        wp_redirect(home_url('complete-quote'));
+        exit;
     }
 
 
