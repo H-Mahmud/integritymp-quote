@@ -341,12 +341,6 @@ class Integrity_Mp_Quote
         }
 
         $quote->save();
-        // echo '<pre>';
-
-        // // var_dump($cart_items);
-
-        // echo '</pre>';
-        // wp_die();
         WC()->cart->empty_cart();
 
         wp_redirect(home_url('complete-quote'));
