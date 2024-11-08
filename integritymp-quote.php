@@ -29,3 +29,14 @@ require_once IMQ_PLUGIN_DIR_PATH . 'imq-functions.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-customer-account.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-imq-product.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-imq-quote.php';
+require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-quote-abstract.php';
+require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-quote.php';
+
+
+function delete_quote_item($quote_item_id)
+{
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'quote_product_lookup';
+    $deleted = $wpdb->delete($table_name, ['quote_item_id' => $quote_item_id], ['%d']);
+    return $deleted !== false;
+}
