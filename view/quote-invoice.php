@@ -1,5 +1,18 @@
 <?php
 defined('ABSPATH') || exit;
+
+$quote_id = get_query_var('view-quote');
+
+if (!$quote_id || get_post_type($quote_id) != 'shop_quote') {
+    global $wp_query;
+    $wp_query->set_404();
+    status_header(404);
+    get_template_part('404');
+    exit;
+}
+
+
+$post = get_post($quote_id);
 // Get cart items
 $cart_items = WC()->cart->get_cart();
 
@@ -128,11 +141,11 @@ ob_start();
                 <table>
                     <tr>
                         <td>Quote Number:</td>
-                        <td> 12345</td>
+                        <td> <?php echo $post->ID; ?></td>
                     </tr>
                     <tr>
                         <td>Quote Date:</td>
-                        <td> 01/01/2023</td>
+                        <td> <?php echo get_the_date('M d, Y', $quote_id) ?></td>
                     </tr>
                 </table>
             </div>
