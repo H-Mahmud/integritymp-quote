@@ -31,7 +31,8 @@ class Integrity_Mp_Quote
         add_action('init', array(self::class, 'add_view_quote_endpoint'));
         add_filter('woocommerce_account_menu_items', array($this, 'add_quotes_link_my_account'));
         add_action('woocommerce_account_quotes_endpoint', array($this, 'my_account_quotes_content'));
-        add_action('woocommerce_account_view-quote_endpoint', array($this, 'my_account_view_quote_content'));
+        // add_action('woocommerce_account_view-quote_endpoint', array($this, 'my_account_view_quote_content'));
+        // add_action('woocommerce_account_view-quote_endpoint', array($this, 'my_account_view_quote_content'));
         add_action('wp', array($this, 'get_quote_request'));
 
         add_filter('page_template', array($this, 'complete_quote_page_template'));
@@ -363,3 +364,15 @@ class Integrity_Mp_Quote
     }
 }
 Integrity_Mp_Quote::get_instance();
+
+
+add_filter('template_include', function ($template) {
+    global $wp_query;
+    if (isset($wp_query->query_vars['view-quote'])) {
+        $custom_template = IMQ_PLUGIN_DIR_PATH . 'view/quote-invoice.php';
+        if ($custom_template) {
+            return $custom_template;
+        }
+    }
+    return $template;
+});
