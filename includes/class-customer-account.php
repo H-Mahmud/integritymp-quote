@@ -495,16 +495,28 @@ class Integrity_Mp_Quote_Customer_Account
         }
 
         $status = get_user_meta($user->ID, 'verification_status', true);
+        $price_level = get_user_meta($user->ID, 'price_level', true);
     ?>
         <h3><?php _e('Verification Status', 'integritymp-qoute'); ?></h3>
         <table class="form-table">
             <tr>
-                <th><label for="verification_status"><?php _e('Status', 'textdomain'); ?></label></th>
+                <th><label for="verification_status"><?php _e('Status', 'integritymp-quote'); ?></label></th>
                 <td>
                     <select name="verification_status" id="verification_status">
                         <option value="unverified" <?php selected($status, 'unverified'); ?>>Unverified</option>
                         <option value="verified" <?php selected($status, 'verified'); ?>>Verified</option>
                         <option value="rejected" <?php selected($status, 'rejected'); ?>>Rejected</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <th><label for="price_level"><?php _e('Price Level', 'integritymp-quote'); ?></label></th>
+                <td>
+                    <select name="price_level" id="price_level">
+                        <option value="" <?php selected($price_level, ''); ?>>Undefined</option>
+                        <option value="_price_level_2" <?php selected($price_level, '_price_level_1'); ?>>Price Level 1</option>
+                        <option value="_price_level_2" <?php selected($price_level, '_price_level_2'); ?>>Price Level 2</option>
                     </select>
                 </td>
             </tr>
@@ -526,6 +538,10 @@ class Integrity_Mp_Quote_Customer_Account
     {
         if (current_user_can('manage_options') && isset($_POST['verification_status'])) {
             update_user_meta($user_id, 'verification_status', $_POST['verification_status']);
+        }
+
+        if (current_user_can('manage_options') && isset($_POST['price_level'])) {
+            update_user_meta($user_id, 'price_level', $_POST['price_level']);
         }
     }
 
