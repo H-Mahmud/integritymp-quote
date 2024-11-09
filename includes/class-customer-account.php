@@ -496,8 +496,9 @@ class Integrity_Mp_Quote_Customer_Account
 
         $status = get_user_meta($user->ID, 'verification_status', true);
         $price_level = get_user_meta($user->ID, 'price_level', true);
+        $is_tax_exempt = get_user_meta($user->ID, 'tax_exempt', true);
     ?>
-        <h3><?php _e('Verification Status', 'integritymp-qoute'); ?></h3>
+        <h3><?php _e('Verification Status', 'integritymp-quote'); ?></h3>
         <table class="form-table">
             <tr>
                 <th><label for="verification_status"><?php _e('Status', 'integritymp-quote'); ?></label></th>
@@ -520,6 +521,14 @@ class Integrity_Mp_Quote_Customer_Account
                     </select>
                 </td>
             </tr>
+
+            <tr>
+                <th><label for="tax_exempt"><?php esc_html_e('Tax Exempt', 'integritymp-quote'); ?></label></th>
+                <td>
+                    <input type="checkbox" name="tax_exempt" id="tax_exempt" value="1" <?php checked($is_tax_exempt, '1'); ?>>
+                    <span class="description"><?php esc_html_e('Check if this customer is tax-exempt.', 'integritymp-quote'); ?></span>
+                </td>
+            </tr>
         </table>
 <?php
     }
@@ -536,12 +545,20 @@ class Integrity_Mp_Quote_Customer_Account
      */
     public function save_verification_status($user_id)
     {
-        if (current_user_can('manage_options') && isset($_POST['verification_status'])) {
+        if (!current_user_can('manage_options')) return;
+
+        if (isset($_POST['verification_status'])) {
             update_user_meta($user_id, 'verification_status', $_POST['verification_status']);
         }
 
-        if (current_user_can('manage_options') && isset($_POST['price_level'])) {
+        if (isset($_POST['price_level'])) {
             update_user_meta($user_id, 'price_level', $_POST['price_level']);
+        }
+
+        if (isset($_POST['tax_exempt'])) {
+            update_user_meta($user_id, 'tax_exempt', 1);
+        } else {
+            delete_user_meta($user_id, 'tax_exempt');
         }
     }
 
