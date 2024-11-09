@@ -170,6 +170,7 @@ abstract class IMQ_Abstract_Quote
         $date_created = current_time('mysql');
         $price = $product->get_price();
         $quote_price = $this->get_quote_price($product_id);
+        $price_level = $this->get_price_level();
 
 
         $data = [
@@ -179,6 +180,9 @@ abstract class IMQ_Abstract_Quote
             'customer_id'   => $customer_id,
             'date_created'  => $date_created,
             'product_qty'   => $product_qty,
+            'price' => $price,
+            'quote_price' => $quote_price,
+            'price_level' => $price_level,
         ];
 
         $inserted = $wpdb->insert($table_name, $data, [
@@ -187,7 +191,10 @@ abstract class IMQ_Abstract_Quote
             '%d', // variation_id
             '%d', // customer_id
             '%s', // date_created
-            '%d'  // product_qty
+            '%d',  // product_qty
+            '%d',  // price
+            '%d',  // quote_price
+            '%s'  // price_level
         ]);
 
         return $inserted ? $wpdb->insert_id : false;
@@ -195,10 +202,22 @@ abstract class IMQ_Abstract_Quote
 
     public function get_quote_price($product_id)
     {
-        return 0;
+        $price_level = $this->get_price_level();
+        if ($price_level && $price = get_post_meta($product_id, $price_level, true)) {
+            return $price;
+        }
+        $product = wc_get_product($product_id);
+        return $product->get_price();
     }
 
 
+    private function get_price_level()
+    {
+        $customer_id = $this->get_user_id();
+        $price_level = get_user_meta($customer_id, 'price_level', true);
+
+        return $price_level;
+    }
 
     protected function set_item($product_id, $product_qty = 1)
     {
@@ -214,6 +233,20 @@ abstract class IMQ_Abstract_Quote
         foreach ($items as $item) {
             $this->insert_quote_item($item['product_id'], $item['product_qty']);
         }
+    }
+
+    protected function get_items()
+    {
+        global $wpdb;
+        $quote_id = $this->get_id();
+        $quote_items = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$wpdb->prefix}quote_product_lookup WHERE quote_id = %d",
+                $quote_id
+            )
+        );
+
+        return $quote_items;
     }
 
 

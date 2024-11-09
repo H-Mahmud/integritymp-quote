@@ -4,9 +4,9 @@ defined('ABSPATH') || exit;
 class IMQ_Quote extends IMQ_Abstract_Quote
 {
 
-    public function __construct()
+    public function __construct($order = 0)
     {
-        parent::__construct();
+        parent::__construct($order);
     }
 
     public function add_product($product_id, $quantity)
@@ -17,5 +17,10 @@ class IMQ_Quote extends IMQ_Abstract_Quote
     public function add_shipping($address)
     {
         parent::add_shipping($address);
+    }
+
+    public function get_items()
+    {
+        return parent::get_items();
     }
 }
