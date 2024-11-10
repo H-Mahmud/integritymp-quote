@@ -15,7 +15,7 @@ $quote_items = $quote->get_items();
 <html>
 
 <head>
-    <title><?php the_title($quote_id) ?></title>
+    <title><?php echo get_the_title($quote_id) ?></title>
     <style>
         * {
             margin: 0;
