@@ -75,6 +75,15 @@ $quote_items = $quote->get_items();
         text-align: center;
     }
 
+    .table.quote-to {
+        max-width: 300px;
+    }
+
+    .table.quote-to td {
+        border-left: 0;
+        vertical-align: text-top;
+    }
+
 
     .table-total {
         width: 300px;
@@ -165,7 +174,7 @@ $quote_items = $quote->get_items();
         </div>
     </div>
 
-    <table class="table" style="max-width: 300px;">
+    <table class="table quote-to">
         <thead>
             <tr>
                 <th colspan="2">Quote To:</th>
