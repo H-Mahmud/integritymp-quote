@@ -252,7 +252,7 @@ $quote_items = $quote->get_items();
             </tr>
             <tr class="total">
                 <th>TOTAL</th>
-                <th><?php echo number_format(00, 2); ?></th>
+                <th><?php echo number_format($quote->get_total(), 2); ?></th>
             </tr>
         </table>
 

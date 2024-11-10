@@ -301,6 +301,11 @@ abstract class IMQ_Abstract_Quote
         update_post_meta($this->get_id(), '_total', $total);
     }
 
+    public function get_total()
+    {
+        return (int) get_post_meta($this->get_id(), '_total', true);
+    }
+
     public function save()
     {
         $this->save_items();
