@@ -237,16 +237,7 @@ abstract class IMQ_Abstract_Quote
 
     protected function get_items()
     {
-        global $wpdb;
-        $quote_id = $this->get_id();
-        $quote_items = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT * FROM {$wpdb->prefix}quote_product_lookup WHERE quote_id = %d",
-                $quote_id
-            )
-        );
-
-        return $quote_items;
+        return new IMQ_Quote_Items($this->get_id());
     }
 
 

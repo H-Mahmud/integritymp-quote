@@ -29,6 +29,7 @@ require_once IMQ_PLUGIN_DIR_PATH . 'imq-functions.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-customer-account.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-imq-product.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-imq-quote.php';
+require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-quote-items.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-quote-shipping.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-quote-abstract.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-quote.php';

@@ -9,8 +9,6 @@ if (!$quote_id || get_post_type($quote_id) != 'shop_quote') {
     get_template_part('404');
     exit;
 }
-
-$post = get_post($quote_id);
 $quote = new IMQ_Quote($quote_id);
 $quote_items = $quote->get_items();
 ?>
@@ -163,7 +161,7 @@ $quote_items = $quote->get_items();
                 <table>
                     <tr>
                         <td>Quote Number:</td>
-                        <td> <?php echo $post->ID; ?></td>
+                        <td> <?php _e($quote_id); ?></td>
                     </tr>
                     <tr>
                         <td>Quote Date:</td>
@@ -235,27 +233,13 @@ $quote_items = $quote->get_items();
                 </tr>
             </thead>
             <tbody>
-                <?php
-                $total_price = 0;
-                foreach ($quote_items as $item):
-                    $quantity = $item->product_qty;
-                    $unit_price = $item->quote_price;
-                    $ext_price = $unit_price * $quantity;
-                    $product = wc_get_product($item->product_id);
-                    $sku = '';
-                    $description = '';
-                    if ($product) {
-                        $sku = $product->get_sku();
-                        $description = $product->get_description();
-                    }
-                    $total_price += $unit_price;
-                ?>
+                <?php foreach ($quote_items as $item): ?>
                     <tr>
-                        <td class="amount"><?php echo esc_html($quantity); ?></td>
-                        <td><?php echo esc_html($sku); ?></td>
-                        <td><?php echo esc_html($description); ?></td>
-                        <td class="amount"><?php echo number_format($unit_price, 2); ?></td>
-                        <td class="amount"><?php echo number_format($ext_price, 2); ?></td>
+                        <td class="amount"><?php echo $item->get_product_qty(); ?></td>
+                        <td><?php echo $item->get_line_item(); ?></td>
+                        <td><?php echo $item->get_description(); ?></td>
+                        <td class="amount"><?php echo number_format($item->get_quote_price(), 2); ?></td>
+                        <td class="amount"><?php echo number_format($item->get_quote_price_total(), 2); ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -268,7 +252,7 @@ $quote_items = $quote->get_items();
             </tr>
             <tr class="total">
                 <th>TOTAL</th>
-                <th><?php echo number_format($total_price, 2); ?></th>
+                <th><?php echo number_format(00, 2); ?></th>
             </tr>
         </table>
 
