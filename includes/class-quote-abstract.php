@@ -251,8 +251,25 @@ abstract class IMQ_Abstract_Quote
         return new IMQ_Shipping($this->get_id());
     }
 
+
+    /**
+     * Calculates the total price for all items in the quote.
+     *
+     * @since 1.0.0
+     */
+    private function calculate_total()
+    {
+        $total = 0;
+        $items = $this->get_items();
+        foreach ($items as $item) {
+            $total += $item->get_quote_price_total();
+        }
+        update_post_meta($this->get_id(), '_total', $total);
+    }
+
     public function save()
     {
         $this->add_items();
+        $this->calculate_total();
     }
 }
