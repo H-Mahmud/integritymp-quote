@@ -99,6 +99,33 @@ abstract class IMQ_Abstract_Quote
         return false;
     }
 
+    protected function get_price_level()
+    {
+
+        $price_level = get_post_meta($this->get_id(), 'price_level');
+        switch ($price_level) {
+            case '_price_level_1':
+                $label = 'Level 1';
+                break;
+            case '_price_level_2':
+                $label = 'Level 2';
+                break;
+            default:
+                $label = 'Undefined';
+        }
+        return $label;
+    }
+
+    public function get_text_exempt()
+    {
+        $text_exempt = get_post_meta($this->get_id(), '_text_exempt', true);
+        if ($text_exempt) {
+            return 'Yes';
+        } else {
+            return 'No';
+        }
+    }
+
     private function add_quote()
     {
         $quote_id = wp_insert_post(array(
@@ -177,18 +204,37 @@ abstract class IMQ_Abstract_Quote
         return $product->get_price();
     }
 
-
     /**
-     * Retrieves the price level of the customer associated with the quote.
+     * Saves the customer's current price level to the quote.
      *
-     * @return string The price level of the customer, or an empty string if not set.
+     * The price level is retrieved from the customer's user meta, and saved to the quote
+     * as a post meta field. This allows the quote to be converted to an order later
+     * without losing the customer's price level.
+     *
+     * @since 1.0.0
      */
-    private function get_price_level()
+    private function save_price_level()
     {
         $customer_id = $this->get_user_id();
         $price_level = get_user_meta($customer_id, 'price_level', true);
 
-        return $price_level;
+        update_post_meta($this->get_id(), 'price_level', $price_level);
+    }
+
+    /**
+     * Saves the customer's current text exempt status to the quote.
+     *
+     * The text exempt status is retrieved from the customer's user meta, and saved to the quote
+     * as a post meta field. This allows the quote to be converted to an order later
+     * without losing the customer's tax exempt status.
+     *
+     * @since 1.0.0
+     */
+    private function save_text_exempt()
+    {
+        $customer_id = $this->get_user_id();
+        $text_exempt = get_user_meta($customer_id, 'text_exempt', true);
+        update_post_meta($this->get_id(), 'text_exempt', $text_exempt);
     }
 
     /**
@@ -308,6 +354,7 @@ abstract class IMQ_Abstract_Quote
 
     public function save()
     {
+        $this->save_price_level();
         $this->save_items();
         $this->calculate_total();
     }

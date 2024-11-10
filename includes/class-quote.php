@@ -9,6 +9,11 @@ class IMQ_Quote extends IMQ_Abstract_Quote
         parent::__construct($order);
     }
 
+    public function get_price_level()
+    {
+        return parent::get_price_level();
+    }
+
     public function add_product($product_id, $quantity)
     {
         parent::set_item($product_id, $quantity);
