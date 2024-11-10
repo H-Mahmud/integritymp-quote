@@ -45,7 +45,6 @@ abstract class IMQ_Abstract_Quote
         'new_quote_email_sent'         => false,
     );
 
-
     /**
      * Quote Items
      * 
@@ -155,34 +154,107 @@ abstract class IMQ_Abstract_Quote
     }
 
 
+    /**
+     * Retrieves the price for the given product ID based on the customer's price level.
+     *
+     * If the customer has a price level set, this function will first look for a meta value
+     * with the key set to the price level. If that value exists, it will be returned.
+     *
+     * If no price level is set, or if the price level meta value does not exist, this function
+     * will fall back to retrieving the product's regular price.
+     *
+     * @param int $product_id The ID of the product.
+     *
+     * @return float The price of the product based on the customer's price level.
+     */
+    public function get_quote_price($product_id)
+    {
+        $price_level = $this->get_price_level();
+        if ($price_level && $price = get_post_meta($product_id, $price_level, true)) {
+            return $price;
+        }
+        $product = wc_get_product($product_id);
+        return $product->get_price();
+    }
 
-    private function insert_quote_item($product_id, $product_qty = 1)
+
+    /**
+     * Retrieves the price level of the customer associated with the quote.
+     *
+     * @return string The price level of the customer, or an empty string if not set.
+     */
+    private function get_price_level()
+    {
+        $customer_id = $this->get_user_id();
+        $price_level = get_user_meta($customer_id, 'price_level', true);
+
+        return $price_level;
+    }
+
+    /**
+     * Adds shipping data to the quote
+     *
+     * @param array $shipping Shipping data to add
+     * @return void
+     */
+    protected function add_shipping($shipping)
+    {
+        update_post_meta($this->get_id(), '_shipping', maybe_serialize($shipping));
+    }
+
+    public function get_shipping()
+    {
+        return new IMQ_Shipping($this->get_id());
+    }
+
+    /**
+     * Return an array of items in the quote.
+     *
+     * @return IMQ_Quote_Items
+     */
+    protected function get_items()
+    {
+        return new IMQ_Quote_Items($this->get_id());
+    }
+
+    /**
+     * Save items to the database
+     *
+     * @return void
+     */
+    private function save_items()
+    {
+        $items = $this->data_items;
+        foreach ($items as $item) {
+            $this->insert_item($item['product_id'], $item['product_qty']);
+        }
+    }
+
+    /**
+     * Insert a product item into the quote_product_lookup table
+     *
+     * @param int $product_id The product ID
+     * @param int $product_qty The quantity of the product to add
+     *
+     * @return int|false The ID of the inserted row, or false if the insert failed
+     */
+    private function insert_item($product_id, $product_qty = 1)
     {
         $product = wc_get_product($product_id);
         if (!$product) return false;
 
         global $wpdb;
         $table_name = $wpdb->prefix . 'quote_product_lookup';
-
-        $quote_id = $this->get_id();
-        $variation_id = 0;
-        $customer_id = $this->get_user_id();
-        $date_created = current_time('mysql');
-        $price = $product->get_price();
-        $quote_price = $this->get_quote_price($product_id);
-        $price_level = $this->get_price_level();
-
-
         $data = [
-            'quote_id'      => $quote_id,
+            'quote_id'      => $this->get_id(),
             'product_id'    => $product_id,
-            'variation_id'  => $variation_id,
-            'customer_id'   => $customer_id,
-            'date_created'  => $date_created,
+            'variation_id'  => 0,
+            'customer_id'   => $this->get_user_id(),
+            'date_created'  => current_time('mysql'),
             'product_qty'   => $product_qty,
-            'price' => $price,
-            'quote_price' => $quote_price,
-            'price_level' => $price_level,
+            'price' => $product->get_price(),
+            'quote_price' => $this->get_quote_price($product_id),
+            'price_level' => $this->get_price_level(),
         ];
 
         $inserted = $wpdb->insert($table_name, $data, [
@@ -200,25 +272,12 @@ abstract class IMQ_Abstract_Quote
         return $inserted ? $wpdb->insert_id : false;
     }
 
-    public function get_quote_price($product_id)
-    {
-        $price_level = $this->get_price_level();
-        if ($price_level && $price = get_post_meta($product_id, $price_level, true)) {
-            return $price;
-        }
-        $product = wc_get_product($product_id);
-        return $product->get_price();
-    }
-
-
-    private function get_price_level()
-    {
-        $customer_id = $this->get_user_id();
-        $price_level = get_user_meta($customer_id, 'price_level', true);
-
-        return $price_level;
-    }
-
+    /**
+     * Sets a product item in the quote, for use when constructing a quote manually.
+     *
+     * @param int $product_id The product ID
+     * @param int $product_qty The quantity of the product to add
+     */
     protected function set_item($product_id, $product_qty = 1)
     {
         $this->data_items[] = [
@@ -226,31 +285,6 @@ abstract class IMQ_Abstract_Quote
             'product_qty'   => $product_qty,
         ];
     }
-
-    private function add_items()
-    {
-        $items = $this->data_items;
-        foreach ($items as $item) {
-            $this->insert_quote_item($item['product_id'], $item['product_qty']);
-        }
-    }
-
-    protected function get_items()
-    {
-        return new IMQ_Quote_Items($this->get_id());
-    }
-
-
-    protected function add_shipping($shipping)
-    {
-        update_post_meta($this->get_id(), '_shipping', maybe_serialize($shipping));
-    }
-
-    public function get_shipping()
-    {
-        return new IMQ_Shipping($this->get_id());
-    }
-
 
     /**
      * Calculates the total price for all items in the quote.
@@ -269,7 +303,7 @@ abstract class IMQ_Abstract_Quote
 
     public function save()
     {
-        $this->add_items();
+        $this->save_items();
         $this->calculate_total();
     }
 }
