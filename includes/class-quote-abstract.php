@@ -255,6 +255,11 @@ abstract class IMQ_Abstract_Quote
         update_post_meta($this->get_id(), '_shipping', maybe_serialize($shipping));
     }
 
+    public function get_shipping()
+    {
+        return new IMQ_Shipping($this->get_id());
+    }
+
     public function save()
     {
         $this->add_items();

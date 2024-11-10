@@ -181,17 +181,11 @@ $quote_items = $quote->get_items();
             </thead>
             <tr>
                 <?php
-                $shipping = maybe_unserialize(get_post_meta($quote_id, '_shipping', true));
-
-                $business_name = $shipping['company'];
-                $first_name =  $shipping['first_name'];
-                $last_name = $shipping['last_name'];
-                $full_name = $first_name . ' ' . $last_name;
-                $street_address = $shipping['address_1'];
-                $city = $shipping['city'];
-                $state = $shipping['state'];
-                $zip = $shipping['postcode'];
-                $state_address = $city . ', ' . $state . ' ' . $zip;
+                $shipping = $quote->get_shipping();
+                $business_name = $shipping->get_company();
+                $full_name = $shipping->get_full_name();
+                $street_address = $shipping->get_address_1();
+                $state_address = $shipping->get_state_address();
 
                 echo <<<HTML
                         <td>
