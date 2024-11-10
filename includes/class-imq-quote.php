@@ -36,6 +36,7 @@ class Integrity_Mp_Quote
         add_action('wp', array($this, 'get_quote_request'));
 
         add_filter('page_template', array($this, 'complete_quote_page_template'));
+        add_action('before_delete_post', array($this, 'delete_quote_product_lookup'));
     }
 
 
@@ -348,6 +349,25 @@ class Integrity_Mp_Quote
         exit;
     }
 
+
+
+    /**
+     * Deletes a quote product lookup entry from the database for a given post ID.
+     *
+     * This function is triggered before a post is deleted. It checks if the post type
+     * is 'shop_quote' and removes the corresponding entry from the 'quote_product_lookup'
+     * table in the database.
+     *
+     * @param int $post_id The ID of the post being deleted.
+     */
+    public function delete_quote_product_lookup($post_id)
+    {
+        global $wpdb;
+        if (get_post_type($post_id) === 'shop_quote') {
+            $table_name = $wpdb->prefix . 'quote_product_lookup';
+            $wpdb->delete($table_name, array('quote_id' => $post_id), array('%d'));
+        }
+    }
 
 
     /**
