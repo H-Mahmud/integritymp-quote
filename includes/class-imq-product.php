@@ -160,16 +160,16 @@ class Integrity_Mp_Quote_Product
             update_post_meta($object->get_id(), '_cost', $data['_cost']);
 
 
-        if (!empty($data['vendor'])) {
-            $vendor_value = sanitize_text_field($data['vendor']);
-            $taxonomy_slug = 'vendor';
+        if (!empty($data['manufacturer'])) {
+            $manufacturer_value = sanitize_text_field($data['manufacturer']);
+            $taxonomy_slug = 'manufacturer';
             $taxonomy = 'pa_' . $taxonomy_slug;
             $term_ids = array();
-            $term = get_term_by('name', $vendor_value, $taxonomy);
+            $term = get_term_by('name', $manufacturer_value, $taxonomy);
             if ($term) {
                 $term_ids[] = (int) $term->term_id;
             } else {
-                $result =  wp_insert_term($vendor_value, $taxonomy);
+                $result =  wp_insert_term($manufacturer_value, $taxonomy);
                 $term_ids[] =  $result['term_id'];
             }
 
@@ -180,14 +180,15 @@ class Integrity_Mp_Quote_Product
 
 
     /**
-     * Adds custom fields to the CSV mapping options for product import.
+     * Adds custom fields to the CSV mapping options.
      *
-     * This function extends the available mapping options for product import by
-     * adding custom fields. Specifically, it adds three price level fields and a
-     * vendor field to the CSV mapping options.
+     * This function takes an array of options and adds custom fields to it.
+     * The custom fields are 'Price Level 1', 'Price Level 2', 'Cost', and 'Manufacturer',
+     * which are added to the existing options with the IDs '_price_level_1', '_price_level_2',
+     * '_cost', and 'manufacturer', respectively.
      *
-     * @param array $options The existing CSV mapping options.
-     * @return array The modified CSV mapping options including custom fields.
+     * @param array $options The existing options.
+     * @return array The modified options with custom fields added.
      */
     public function add_custom_fields_to_csv_mapping($options)
     {
@@ -195,21 +196,22 @@ class Integrity_Mp_Quote_Product
         $options['price']['options']['_price_level_2'] = 'Price Level 2';
         $options['price']['options']['_cost'] = 'Cost';
 
-        $options['vendor'] = 'Vendor';
+        $options['manufacturer'] = 'Manufacturer';
         return $options;
     }
 
 
 
     /**
-     * Sets the default mapping for custom fields when importing products from a CSV file.
+     * Sets default CSV mapping for custom fields.
      *
-     * This function takes an array of default column mappings and adds custom fields to it.
-     * The custom fields are 'Price Level 1', 'Price Level 2', 'Cost', and 'Vendor', which
-     * are mapped to the corresponding custom fields in the database.
+     * This function modifies the provided columns array by adding default
+     * mappings for custom fields. The custom fields include 'Price Level 1',
+     * 'Price Level 2', 'Cost', and 'Manufacturer', which are mapped to their
+     * respective IDs '_price_level_1', '_price_level_2', '_cost', and 'manufacturer'.
      *
-     * @param array $columns The existing default column mappings.
-     * @return array The modified default column mappings with custom fields added.
+     * @param array $columns The existing columns array to be modified.
+     * @return array The modified columns array with default mappings for custom fields.
      */
     function set_default_csv_mapping_for_custom_fields($columns)
     {
@@ -217,10 +219,47 @@ class Integrity_Mp_Quote_Product
         $columns['Price Level 2'] = '_price_level_2';
         $columns['Cost'] = '_cost';
 
-        $columns['Vendor'] = 'vendor';
+        $columns['Manufacturer'] = 'manufacturer';
         return $columns;
     }
 
+
+
+
+
+    public function custom_woocommerce_product_import_images($parsed_data)
+    {
+        if (isset($parsed_data['images'])) {
+            $parsed_data['images'] = $this->custom_process_product_import_images($parsed_data['images']);
+        }
+        return $parsed_data;
+    }
+
+
+    /**
+     * Processes the images field from the CSV file being imported.
+     *
+     * If the image is a URL, it is added to the array of image URLs as-is.
+     * If the image is a filename, it is assumed to reside in the
+     * /wp-content/images/ directory and the URL is constructed accordingly.
+     *
+     * @param array $images The images field from the CSV file.
+     * @return array The array of image URLs.
+     */
+    private function custom_process_product_import_images($images)
+    {
+        $images_base_url = site_url('/wp-content/images/');
+
+        $image_urls = [];
+        foreach ($images as $filename) {
+            if (filter_var($filename, FILTER_VALIDATE_URL)) {
+                $image_urls[] = $filename;
+            } else {
+                $image_urls[] = $images_base_url . $filename;
+            }
+        }
+        return $image_urls;
+    }
 
 
     /**

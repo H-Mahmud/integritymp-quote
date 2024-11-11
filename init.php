@@ -30,8 +30,8 @@ register_activation_hook(IMQ_PLUGIN_FILE, 'imq_plugin_activation');
  */
 function imq_create_vendor_attribute()
 {
-    $slug = 'vendor';
-    $name = 'Vendor';
+    $slug = 'manufacturer';
+    $name = 'Manufacturer';
     if (taxonomy_exists('pa_' . $slug)) return;
 
     $attribute = array(
