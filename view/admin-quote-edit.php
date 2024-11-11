@@ -186,7 +186,7 @@ $quote_items = $quote->get_items();
             ?>
             <td>Customer:</td>
             <td><?php
-                $user_profile_url = admin_url('user-edit.php?user_id=' . $quote->get_user_id());
+                $user_profile_url = admin_url('user-edit.php?user_id=' . $quote->get_customer_id());
                 echo '<a href="' . esc_url($user_profile_url) . '" target="_blank">' . $shipping->get_full_name() . '</a>';
                 ?></td>
         </tr>
@@ -198,11 +198,11 @@ $quote_items = $quote->get_items();
         </tr>
         <tr>
             <td>Price Level:</td>
-            <td><?php $quote->get_price_level(); ?></td>
+            <td><?php echo $quote->get_price_level_label(); ?></td>
         </tr>
         <tr>
             <td>Tax Exempt:</td>
-            <td><?php $quote->get_text_exempt(); ?></td>
+            <td><?php echo $quote->get_tax_exempt(); ?></td>
         </tr>
         <tr>
             <td>Address:</td>
