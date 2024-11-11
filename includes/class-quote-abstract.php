@@ -12,22 +12,13 @@ abstract class IMQ_Abstract_Quote
     protected $data = array(
         'id'                           => 0,
         'status'                       => '',
-        'currency'                     => '',
-        'prices_include_tax'           => false,
-        'date_created'                 => null,
-        'date_modified'                => null,
-        'discount_total'               => 0,
-        'discount_tax'                 => 0,
-        'shipping_total'               => 0,
-        'shipping_tax'                 => 0,
-        'cart_tax'                     => 0,
-        'total'                        => 0,
-        'total_tax'                    => 0,
-
-        // Order props.
+        // Quote props.
         'customer_id'                  => 0,
-        'order_key'                    => '',
-        'shipping'                     => array(
+        'price_level'                  => '',
+        'tax_exempt'                   => '',
+        'items'                        => array(),
+        'total'                        => '',
+        'shipping'       => array(
             'first_name' => '',
             'last_name'  => '',
             'company'    => '',
@@ -39,10 +30,6 @@ abstract class IMQ_Abstract_Quote
             'country'    => '',
             'phone'      => '',
         ),
-        'customer_ip_address'          => '',
-        'customer_user_agent'          => '',
-        // Operational data.
-        'new_quote_email_sent'         => false,
     );
 
     /**
@@ -148,37 +135,7 @@ abstract class IMQ_Abstract_Quote
         $this->set_id($quote_id);
     }
 
-    // Function to retrieve quote data
-    public function get_shop_quote_data($quote_id)
-    {
-        $data = array(
-            'id'                    => $quote_id,
-            'status'                => get_post_meta($quote_id, '_status', true),
-            'currency'              => get_post_meta($quote_id, '_currency', true),
-            'prices_include_tax'    => get_post_meta($quote_id, '_prices_include_tax', true),
-            'date_created'          => get_post_meta($quote_id, '_date_created', true),
-            'date_modified'         => get_post_meta($quote_id, '_date_modified', true),
-            'discount_total'        => get_post_meta($quote_id, '_discount_total', true),
-            'discount_tax'          => get_post_meta($quote_id, '_discount_tax', true),
-            'shipping_total'        => get_post_meta($quote_id, '_shipping_total', true),
-            'shipping_tax'          => get_post_meta($quote_id, '_shipping_tax', true),
-            'cart_tax'              => get_post_meta($quote_id, '_cart_tax', true),
-            'total'                 => get_post_meta($quote_id, '_total', true),
-            'total_tax'             => get_post_meta($quote_id, '_total_tax', true),
-            'customer_id'           => get_post_meta($quote_id, '_customer_id', true),
-            'order_key'             => get_post_meta($quote_id, '_order_key', true),
-            'shipping'              => get_post_meta($quote_id, '_shipping', true),
-            'customer_ip_address'   => get_post_meta($quote_id, '_customer_ip_address', true),
-            'customer_user_agent'   => get_post_meta($quote_id, '_customer_user_agent', true),
-            'created_via'           => get_post_meta($quote_id, '_created_via', true),
-            'date_completed'        => get_post_meta($quote_id, '_date_completed', true),
-            'date_paid'             => get_post_meta($quote_id, '_date_paid', true),
-            'cart_hash'             => get_post_meta($quote_id, '_cart_hash', true),
-            'new_quote_email_sent'  => get_post_meta($quote_id, '_new_quote_email_sent', true),
-        );
 
-        return $data;
-    }
 
 
     /**
