@@ -345,6 +345,11 @@ class Integrity_Mp_Quote
         $quote_id = $quote->save();
         WC()->cart->empty_cart();
 
+        $current_user = wp_get_current_user();
+        $current_user_email = $current_user->user_email;
+
+        $this->send_quote_mail($current_user_email, 'IntegrityMP Quote #' . $quote_id, $quote_id);
+
         $quote_invoice_view = esc_url(wc_get_account_endpoint_url('view-quote') . $quote_id);
         wp_redirect($quote_invoice_view);
         exit;
@@ -391,6 +396,32 @@ class Integrity_Mp_Quote
             }
         }
         return $template;
+    }
+
+    /**
+     * Sends an email containing the quote to the customer.
+     *
+     * This function requires three parameters: the customer email address to send the quote to,
+     * the subject of the email, and the ID of the quote to be sent. It uses the
+     * 'wp_mail' function to send the email.
+     *
+     * @param string $to The customer email address to send the quote to.
+     * @param string $subject The subject of the email.
+     * @param int $quote_id The ID of the quote to be sent.
+     * @since 1.0
+     */
+    public function send_quote_mail($to, $subject, $quote_id)
+    {
+        require_once IMQ_PLUGIN_DIR_PATH . 'view/quote-email.php';
+        $html_content = imq_quote_email($quote_id);
+
+        $admin_email = get_option('admin_email');
+        $site_title = get_bloginfo('name');
+        $headers = array(
+            'Content-Type: text/html; charset=UTF-8',
+            'From: ' . $site_title . ' <' . $admin_email . '>'
+        );
+        wp_mail($to, $subject, $html_content, $headers);
     }
 
     /**
