@@ -182,7 +182,7 @@ class Integrity_Mp_Quote
         $columns = array(
             'cb' => '<input type="checkbox" />',
             'quote' => __('Quote', 'integritymp-quote'),
-            'status' => __('Status', 'integritymp-quote'),
+            'price_level' => __('Price Level', 'integritymp-quote'),
             'quote_total' => __('Quote Total', 'integritymp-quote'),
             'date' => __('Date', 'integritymp-quote')
         );
@@ -200,15 +200,16 @@ class Integrity_Mp_Quote
 
     public function wc_quote_custom_column_data($column, $post_id)
     {
+        $quote = new IMQ_Quote($post_id);
         switch ($column) {
             case 'quote':
                 echo $this->get_quote_edit_link(get_the_ID());
                 break;
-            case 'status':
-                echo 'Status';
+            case 'price_level':
+                echo $quote->get_price_level_label();
                 break;
             case 'quote_total':
-                echo 'Quote total';
+                echo $quote->get_total();
                 break;
 
             case 'date':
