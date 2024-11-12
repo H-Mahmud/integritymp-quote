@@ -74,7 +74,7 @@ class Integrity_Mp_Quote_Product
      */
     public function cart_page_complete_quote_button()
     {
-        $quote_request = home_url('/complete-quote');
+        $quote_request = wc_get_checkout_url();
         $quote_request = add_query_arg('quote_request', 'true', $quote_request);
 ?>
         <a href="<?php echo esc_url($quote_request); ?>" class="checkout-button button alt wc-forward<?php echo esc_attr(wc_wp_theme_get_element_class_name('button') ? ' ' . wc_wp_theme_get_element_class_name('button') : ''); ?>">
