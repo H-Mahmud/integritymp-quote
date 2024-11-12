@@ -168,23 +168,33 @@ class Integrity_Mp_Quote_Customer_Account
      */
     public function save_woocommerce_custom_registration_fields($customer_id)
     {
-        if (isset($_POST['first_name']))
+        if (isset($_POST['first_name'])) {
             update_user_meta($customer_id, 'first_name', sanitize_text_field($_POST['first_name']));
+            update_user_meta($customer_id, 'shipping_first_name', sanitize_text_field($_POST['first_name']));
+        }
 
-        if (isset($_POST['last_name']))
+        if (isset($_POST['last_name'])) {
             update_user_meta($customer_id, 'last_name', sanitize_text_field($_POST['last_name']));
+            update_user_meta($customer_id, 'shipping_last_name', sanitize_text_field($_POST['last_name']));
+        }
 
-        if (isset($_POST['business_name']))
+        if (isset($_POST['business_name'])) {
             update_user_meta($customer_id, 'business_name', sanitize_text_field($_POST['business_name']));
+            update_user_meta($customer_id, 'shipping_company', sanitize_text_field($_POST['business_name']));
+        }
 
         if (isset($_POST['business_location']))
             update_user_meta($customer_id, 'business_location', sanitize_text_field($_POST['business_location']));
 
-        if (isset($_POST['business_address']))
+        if (isset($_POST['business_address'])) {
             update_user_meta($customer_id, 'business_address', sanitize_text_field($_POST['business_address']));
+            update_user_meta($customer_id, 'shipping_address_1', sanitize_text_field($_POST['business_address']));
+        }
 
-        if (isset($_POST['phone']))
+        if (isset($_POST['phone'])) {
             update_user_meta($customer_id, 'phone', sanitize_text_field($_POST['phone']));
+            update_user_meta($customer_id, 'shipping_phone', sanitize_text_field($_POST['phone']));
+        }
     }
 
 
