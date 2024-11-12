@@ -14,6 +14,7 @@ function imq_plugin_activation()
 {
     imq_create_db_quote_tables();
     imq_create_vendor_attribute();
+    imq_create_product_images_folder();
     Integrity_Mp_Quote::add_quotes_endpoint();
     Integrity_Mp_Quote::add_view_quote_endpoint();
     flush_rewrite_rules();
@@ -96,5 +97,23 @@ function imq_create_db_quote_tables()
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
+    }
+}
+
+/**
+ * Creates the product images folder if it does not exist.
+ *
+ * The folder will be created in the ABSPATH/wp-content directory and will
+ * be named "product-images". The function will also recursively create the
+ * folder if the parent folders do not exist.
+ *
+ * @since 1.0.0
+ */
+function imq_create_product_images_folder()
+{
+    $target_dir = ABSPATH . 'wp-content/product-images';
+
+    if (!file_exists($target_dir)) {
+        mkdir($target_dir, 0755, true);
     }
 }
