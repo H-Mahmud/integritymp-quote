@@ -40,6 +40,7 @@ function imq_quote_email($quote_id)
 
             .invoice {
                 max-width: 800px;
+                min-width: 550px;
                 margin: auto;
             }
 
