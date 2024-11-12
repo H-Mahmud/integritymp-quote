@@ -474,7 +474,7 @@ abstract class IMQ_Abstract_Quote
      */
     public function save()
     {
-        if ($this->get_id()) return;
+        if ($this->get_id()) return $this->get_id();
 
         $quote_id = $this->add_quote();
         if ($quote_id) {
