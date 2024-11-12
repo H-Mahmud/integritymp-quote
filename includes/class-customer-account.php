@@ -593,7 +593,9 @@ class Integrity_Mp_Quote_Customer_Account
         $verification_status = get_user_meta($user_id, 'verification_status', true);
 
         if ($verification_status !== 'verified') {
-            wp_redirect(home_url('/not-verified'));
+            wc_add_notice('Your account is not verified yet or you do not have permission to access it.', 'error');
+
+            wp_redirect(get_permalink(wc_get_page_id('myaccount')));
             exit;
         }
     }
@@ -608,7 +610,7 @@ class Integrity_Mp_Quote_Customer_Account
      */
     public function apply_woocommerce_restrictions()
     {
-        if (is_shop() || is_product_category() || is_product() || is_cart() || is_checkout() || is_page('complete-quote')) {
+        if (is_shop() || is_product_category() || is_product() || is_cart() || is_checkout()) {
             $this->restrict_woocommerce_to_verified_users();
         }
     }
