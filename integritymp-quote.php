@@ -27,6 +27,7 @@ defined('IMQ_PLUGIN_DIR_URL') || define('IMQ_PLUGIN_DIR_URL', plugin_dir_url(__F
 require_once IMQ_PLUGIN_DIR_PATH . 'init.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'imq-functions.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-customer-account.php';
+require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-otp-verification.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-imq-product.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-imq-quote.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-quote-items.php';
