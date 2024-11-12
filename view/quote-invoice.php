@@ -204,7 +204,6 @@ $quote_items = $quote->get_items();
                             <br>
                                 $full_name
                             <br>
-                            Clinical Engineering Services <br>
                             $street_address
                             <br>
                             $state_address

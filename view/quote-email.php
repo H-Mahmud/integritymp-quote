@@ -174,7 +174,6 @@ function imq_quote_email($quote_id)
                             <br>
                                 $full_name
                             <br>
-                            Clinical Engineering Services <br>
                             $street_address
                             <br>
                             $state_address
