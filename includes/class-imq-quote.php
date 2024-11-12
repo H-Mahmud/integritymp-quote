@@ -322,18 +322,18 @@ class Integrity_Mp_Quote
         $cart_items = WC()->cart->get_cart();
         $quote = new IMQ_Quote();
 
-        $shipping_address = [
-            'first_name' => WC()->customer->get_shipping_first_name(),
-            'last_name' => WC()->customer->get_shipping_last_name(),
-            'company' => WC()->customer->get_shipping_company(),
-            'address_1' => WC()->customer->get_shipping_address_1(),
-            'address_2' => WC()->customer->get_shipping_address_2(),
-            'city' => WC()->customer->get_shipping_city(),
-            'state' => WC()->customer->get_shipping_state(),
-            'postcode' => WC()->customer->get_shipping_postcode(),
-            'country' => WC()->customer->get_shipping_country(),
-        ];
 
+        $shipping_address = [
+            'first_name' => WC()->session->get('customer')['shipping_first_name'],
+            'last_name' => WC()->session->get('customer')['shipping_last_name'],
+            'company' => WC()->session->get('customer')['shipping_company'],
+            'address_1' => WC()->session->get('customer')['shipping_address_1'],
+            'address_2' => WC()->session->get('customer')['shipping_address_2'],
+            'city' => WC()->session->get('customer')['shipping_country'],
+            'state' => WC()->session->get('customer')['shipping_state'],
+            'postcode' => WC()->session->get('customer')['shipping_postcode'],
+            'country' => WC()->session->get('customer')['shipping_country'],
+        ];
         $quote->add_shipping($shipping_address);
 
         foreach ($cart_items as $cart_item_key => $cart_item) {
