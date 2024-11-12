@@ -77,9 +77,33 @@ class Integrity_Mp_Quote_Product
         $quote_request = wc_get_checkout_url();
         $quote_request = add_query_arg('quote_request', 'true', $quote_request);
 ?>
-        <a href="<?php echo esc_url($quote_request); ?>" class="checkout-button button alt wc-forward<?php echo esc_attr(wc_wp_theme_get_element_class_name('button') ? ' ' . wc_wp_theme_get_element_class_name('button') : ''); ?>">
+        <a href="<?php echo esc_url($quote_request); ?>" id="quote_request_btn" class="checkout-button button alt wc-forward<?php echo esc_attr(wc_wp_theme_get_element_class_name('button') ? ' ' . wc_wp_theme_get_element_class_name('button') : ''); ?>">
             <?php esc_html_e('Complete Quote', 'integritymp-quote'); ?>
         </a>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const requestQuoteBtn = document.getElementById("quote_request_btn");
+                const shippingCalculatorForm = document.querySelector(".woocommerce-shipping-calculator");
+
+                let isFormSubmitted = false;
+                requestQuoteBtn.addEventListener("click", function(event) {
+                    if (!shippingCalculatorForm.checkValidity()) {
+                        event.preventDefault();
+                        shippingCalculatorForm.reportValidity();
+                        return;
+                    }
+
+                    if (!isFormSubmitted) {
+                        shippingCalculatorForm.querySelector("button[type='submit']").click();
+                        document.body.addEventListener("updated_shipping_method", function() {
+                            isFormSubmitting = true;
+                        });
+                        requestQuoteBtn.click();
+                    }
+                });
+            });
+        </script>
     <?php
     }
 
