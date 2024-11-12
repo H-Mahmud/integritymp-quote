@@ -84,6 +84,6 @@ class IMQ_Quote extends IMQ_Abstract_Quote
      */
     public function save()
     {
-        parent::save();
+        return parent::save();
     }
 }
