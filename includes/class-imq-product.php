@@ -35,6 +35,8 @@ class Integrity_Mp_Quote_Product
         add_action('woocommerce_product_import_inserted_product_object', array($this, 'save_imported_custom_fields'), 10, 2);
         add_filter('woocommerce_csv_product_import_mapping_options', array($this, 'add_custom_fields_to_csv_mapping'));
         add_filter('woocommerce_csv_product_import_mapping_default_columns', array($this, 'set_default_csv_mapping_for_custom_fields'));
+
+        add_filter('woocommerce_product_importer_parsed_data',  array($this, 'custom_woocommerce_product_import_images'), 10, 2);
     }
 
 
@@ -224,43 +226,55 @@ class Integrity_Mp_Quote_Product
     }
 
 
-
-
-
-    public function custom_woocommerce_product_import_images($parsed_data)
+    /**
+     * Modifies the parsed data for a product during import, specifically the 'raw_image_id' and
+     * 'raw_gallery_image_ids' fields. If the image is a URL, it is added to the array of image URLs
+     * as-is. If the image is a filename, it is assumed to reside in the
+     * /wp-content/images/ directory and the URL is constructed accordingly.
+     *
+     * @param array $parsed_data The parsed data for the product being imported.
+     * @param WC_Product_Importer $importer The WC_Product_Importer instance doing the importing.
+     *
+     * @return array The modified parsed data.
+     */
+    public function custom_woocommerce_product_import_images($parsed_data, $importer)
     {
-        if (isset($parsed_data['images'])) {
-            $parsed_data['images'] = $this->custom_process_product_import_images($parsed_data['images']);
+        if (isset($parsed_data['raw_image_id'])) {
+            $parsed_data['raw_image_id'] = $this->custom_process_product_import_images($parsed_data['raw_image_id']);
         }
+
+        if (isset($parsed_data['raw_gallery_image_ids'])) {
+            $parsed_data['raw_gallery_image_ids'] = $this->custom_process_product_import_images($parsed_data['raw_gallery_image_ids']);
+        }
+
         return $parsed_data;
     }
-
 
     /**
      * Processes the images field from the CSV file being imported.
      *
      * If the image is a URL, it is added to the array of image URLs as-is.
      * If the image is a filename, it is assumed to reside in the
-     * /wp-content/images/ directory and the URL is constructed accordingly.
+     * /wp-content/product-images/ directory and the URL is constructed accordingly.
      *
-     * @param array $images The images field from the CSV file.
-     * @return array The array of image URLs.
+     * @param string|array $images The images field from the CSV file.
+     * @return array|string The array of image URLs or a single image URL.
      */
     private function custom_process_product_import_images($images)
     {
-        $images_base_url = site_url('/wp-content/images/');
+        $images_base_url = site_url('/wp-content/product-images/');
+
+        if (is_string($images)) {
+            return filter_var($images, FILTER_VALIDATE_URL) ? $images : $images_base_url . $images;
+        }
 
         $image_urls = [];
         foreach ($images as $filename) {
-            if (filter_var($filename, FILTER_VALIDATE_URL)) {
-                $image_urls[] = $filename;
-            } else {
-                $image_urls[] = $images_base_url . $filename;
-            }
+            $image_urls[] = filter_var($filename, FILTER_VALIDATE_URL) ? $filename : $images_base_url . $filename;
         }
+
         return $image_urls;
     }
-
 
     /**
      * Gets the singleton instance of the class.
