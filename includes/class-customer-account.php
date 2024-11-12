@@ -516,7 +516,7 @@ class Integrity_Mp_Quote_Customer_Account
                 <td>
                     <select name="price_level" id="price_level">
                         <option value="" <?php selected($price_level, ''); ?>>Undefined</option>
-                        <option value="_price_level_2" <?php selected($price_level, '_price_level_1'); ?>>Price Level 1</option>
+                        <option value="_price_level_1" <?php selected($price_level, '_price_level_1'); ?>>Price Level 1</option>
                         <option value="_price_level_2" <?php selected($price_level, '_price_level_2'); ?>>Price Level 2</option>
                     </select>
                 </td>
