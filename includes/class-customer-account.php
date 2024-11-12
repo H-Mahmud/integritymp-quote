@@ -48,6 +48,7 @@ class Integrity_Mp_Quote_Customer_Account
 
         add_action('template_redirect',  array($this, 'apply_woocommerce_restrictions'));
         add_action('woocommerce_product_query', array($this, 'hide_woocommerce_categories'), 10, 1);
+        add_action('wp_head', array($this, 'show_unverified_customer_message'));
     }
 
 
@@ -636,6 +637,61 @@ class Integrity_Mp_Quote_Customer_Account
         }
     }
 
+    /**
+     * Shows a message to unverified customers on the front-end.
+     *
+     * If the user is logged in and their verification status is not 'verified', this function
+     * displays a message at the top of the page with a link to the contact page for assistance.
+     *
+     * The message is styled with a custom CSS block that is added to the page.
+     */
+    public function show_unverified_customer_message()
+    {
+        if (is_user_logged_in()) {
+            $user_id = get_current_user_id();
+            $verified_status = get_user_meta($user_id, 'verification_status', true);
+            if ($verified_status !== 'verified') {
+                echo '
+            <div class="unverified-customer-message">
+                <p>Your account is not verified yet. Please <a href="/contact">contact support</a> for assistance.</p>
+            </div>
+            ';
+
+                // Add custom CSS for the message styling
+                echo '
+            <style>
+                .unverified-customer-message {
+                    background-color: #f8d7da;
+                    color: #721c24;
+                    text-align: center;
+                    font-size: 16px;
+                    border: 1px solid #f5c6cb;
+                    border-radius: 5px;
+                    position: fixed;
+                    top: 0;
+                    width: 100%;
+                    height: 40px;
+                    z-index: 9999;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+                .unverified-customer-message p {
+                    margin: 0;
+                }
+                .unverified-customer-message a {
+                    color: #721c24;
+                    font-weight: bold;
+                    text-decoration: underline;
+                }
+                #page {
+                  margin-top: 40px;
+                }
+            </style>
+            ';
+            }
+        }
+    }
 
 
     /**
