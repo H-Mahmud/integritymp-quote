@@ -37,6 +37,7 @@ class Integrity_Mp_Quote
 
         add_filter('page_template', array($this, 'complete_quote_page_template'));
         add_action('before_delete_post', array($this, 'delete_quote_product_lookup'));
+        add_filter('template_include', array($this, 'single_quote_invoice_view'));
     }
 
 
@@ -370,6 +371,28 @@ class Integrity_Mp_Quote
         }
     }
 
+    /**
+     * Overrides the template used for displaying a single quote in the frontend.
+     *
+     * This function is hooked to the 'template_include' action hook. It checks if the
+     * query var 'view-quote' is set and loads a custom template if it is. The custom
+     * template is located in the plugin directory and is named 'quote-invoice.php'.
+     *
+     * @param string $template The template file path.
+     * @return string The custom template file path.
+     * @since 1.0
+     */
+    public function single_quote_invoice_view($template)
+    {
+        global $wp_query;
+        if (isset($wp_query->query_vars['view-quote'])) {
+            $custom_template = IMQ_PLUGIN_DIR_PATH . 'view/quote-invoice.php';
+            if ($custom_template) {
+                return $custom_template;
+            }
+        }
+        return $template;
+    }
 
     /**
      * Gets the singleton instance of the class.
@@ -385,15 +408,3 @@ class Integrity_Mp_Quote
     }
 }
 Integrity_Mp_Quote::get_instance();
-
-
-add_filter('template_include', function ($template) {
-    global $wp_query;
-    if (isset($wp_query->query_vars['view-quote'])) {
-        $custom_template = IMQ_PLUGIN_DIR_PATH . 'view/quote-invoice.php';
-        if ($custom_template) {
-            return $custom_template;
-        }
-    }
-    return $template;
-});

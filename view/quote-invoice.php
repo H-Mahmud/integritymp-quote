@@ -1,14 +1,27 @@
 <?php
 defined('ABSPATH') || exit;
 
+if (!is_user_logged_in()) {
+    wp_redirect(wc_get_account_endpoint_url('my-account'));
+    exit;
+}
+
 $quote_id = get_query_var('view-quote');
-if (!$quote_id || get_post_type($quote_id) != 'shop_quote') {
+if (!$quote_id) {
     global $wp_query;
     $wp_query->set_404();
     status_header(404);
     get_template_part('404');
     exit;
 }
+
+$quote = get_post($quote_id);
+if ($quote->post_type != 'shop_quote' || $quote->post_author != get_current_user_id()) {
+    wc_add_notice('Quote not found or you do not have permission to access it.', 'error');
+    wp_redirect(wc_get_account_endpoint_url('my-account'));
+    exit;
+}
+
 $quote = new IMQ_Quote($quote_id);
 $quote_items = $quote->get_items();
 ?>
