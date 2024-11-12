@@ -37,6 +37,8 @@ class Integrity_Mp_Quote_Product
         add_filter('woocommerce_csv_product_import_mapping_default_columns', array($this, 'set_default_csv_mapping_for_custom_fields'));
 
         add_filter('woocommerce_product_importer_parsed_data',  array($this, 'custom_woocommerce_product_import_images'), 10, 2);
+        add_action('woocommerce_cart_totals_before_order_total', array($this, 'add_cart_totals_shipping_address'));
+        add_action('woocommerce_calculated_shipping', array($this, 'save_custom_shipping_field_to_session'));
     }
 
 
@@ -78,7 +80,7 @@ class Integrity_Mp_Quote_Product
         <a href="<?php echo esc_url($quote_request); ?>" class="checkout-button button alt wc-forward<?php echo esc_attr(wc_wp_theme_get_element_class_name('button') ? ' ' . wc_wp_theme_get_element_class_name('button') : ''); ?>">
             <?php esc_html_e('Complete Quote', 'integritymp-quote'); ?>
         </a>
-<?php
+    <?php
     }
 
 
@@ -274,6 +276,126 @@ class Integrity_Mp_Quote_Product
         }
 
         return $image_urls;
+    }
+
+
+    /**
+     * Adds a shipping address row to the cart totals table.
+     *
+     * @since 1.0.0
+     */
+    public function add_cart_totals_shipping_address()
+    {
+    ?>
+        <tr class="shipping-address-row">
+            <th><?php _e('Shipping', 'integritymp-quote'); ?></th>
+            <td>
+
+                <form class="woocommerce-shipping-calculator" action="<?php echo esc_url(wc_get_cart_url()); ?>" method="post">
+                    <section class="shipping-address-form">
+
+                        <?php if (apply_filters('woocommerce_shipping_calculator_enable_country', true)) : ?>
+                            <p class="form-row form-row-wide" id="calc_shipping_country_field">
+                                <label for="calc_shipping_country" class="screen-reader-text"><?php esc_html_e('Country / region:', 'woocommerce'); ?></label>
+                                <select name="calc_shipping_country" id="calc_shipping_country" class="country_to_state country_select" rel="calc_shipping_state">
+                                    <option value="default"><?php esc_html_e('Select a country / region&hellip;', 'woocommerce'); ?></option>
+                                    <?php
+                                    foreach (WC()->countries->get_shipping_countries() as $key => $value) {
+                                        echo '<option value="' . esc_attr($key) . '"' . selected(WC()->customer->get_shipping_country(), esc_attr($key), false) . '>' . esc_html($value) . '</option>';
+                                    }
+                                    ?>
+                                </select>
+                            </p>
+                        <?php endif; ?>
+
+                        <?php if (apply_filters('woocommerce_shipping_calculator_enable_state', true)) : ?>
+                            <p class="form-row form-row-wide" id="calc_shipping_state_field">
+                                <?php
+                                $current_cc = WC()->customer->get_shipping_country();
+                                $current_r  = WC()->customer->get_shipping_state();
+                                $states     = WC()->countries->get_states($current_cc);
+
+                                if (is_array($states) && empty($states)) {
+                                ?>
+                                    <input type="hidden" name="calc_shipping_state" id="calc_shipping_state" placeholder="<?php esc_attr_e('State / County', 'woocommerce'); ?>" required />
+                                <?php
+                                } elseif (is_array($states)) {
+                                ?>
+                                    <span>
+                                        <label for="calc_shipping_state" class="screen-reader-text"><?php esc_html_e('State / County:', 'woocommerce'); ?></label>
+                                        <select name="calc_shipping_state" class="state_select" id="calc_shipping_state" data-placeholder="<?php esc_attr_e('State / County', 'woocommerce'); ?>">
+                                            <option value=""><?php esc_html_e('Select an option&hellip;', 'woocommerce'); ?></option>
+                                            <?php
+                                            foreach ($states as $ckey => $cvalue) {
+                                                echo '<option value="' . esc_attr($ckey) . '" ' . selected($current_r, $ckey, false) . '>' . esc_html($cvalue) . '</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                    </span>
+                                <?php
+                                } else {
+                                ?>
+                                    <label for="calc_shipping_state" class="screen-reader-text"><?php esc_html_e('State / County:', 'woocommerce'); ?></label>
+                                    <input type="text" class="input-text" value="<?php echo esc_attr($current_r); ?>" placeholder="<?php esc_attr_e('State / County', 'woocommerce'); ?>" name="calc_shipping_state" id="calc_shipping_state" required />
+                                <?php
+                                }
+                                ?>
+                            </p>
+                        <?php endif; ?>
+
+                        <?php if (apply_filters('woocommerce_shipping_calculator_enable_city', true)) : ?>
+                            <p class="form-row form-row-wide" id="calc_shipping_city_field">
+                                <label for="calc_shipping_city" class="screen-reader-text"><?php esc_html_e('City:', 'woocommerce'); ?></label>
+                                <input type="text" class="input-text" value="<?php echo esc_attr(WC()->customer->get_shipping_city()); ?>" placeholder="<?php esc_attr_e('City', 'woocommerce'); ?>" name="calc_shipping_city" id="calc_shipping_city" required />
+                            </p>
+                        <?php endif; ?>
+
+                        <?php if (apply_filters('woocommerce_shipping_calculator_enable_postcode', true)) : ?>
+                            <p class="form-row form-row-wide" id="calc_shipping_postcode_field">
+                                <label for="calc_shipping_postcode" class="screen-reader-text"><?php esc_html_e('Postcode / ZIP:', 'woocommerce'); ?></label>
+                                <input type="text" class="input-text" value="<?php echo esc_attr(WC()->customer->get_shipping_postcode()); ?>" placeholder="<?php esc_attr_e('Postcode / ZIP', 'woocommerce'); ?>" name="calc_shipping_postcode" id="calc_shipping_postcode" required />
+                            </p>
+                        <?php endif; ?>
+
+                        <p class="form-row form-row-wide" id="shipping_address_field">
+                            <label for="shipping_address_1" class="screen-reader-text"><?php esc_html_e('Address', 'woocommerce'); ?></label>
+                            <input type="text" class="input-text" value="<?php echo esc_attr(WC()->customer->get_shipping_address_1()); ?>" placeholder="<?php esc_attr_e('Address', 'woocommerce'); ?>" name="shipping_address_1" id="shipping_address_1" required />
+                        </p>
+
+                        <p><button type="submit" name="calc_shipping" value="1" class="button<?php echo esc_attr(wc_wp_theme_get_element_class_name('button') ? ' ' . wc_wp_theme_get_element_class_name('button') : ''); ?>"><?php esc_html_e('Update', 'woocommerce'); ?></button></p>
+                        <?php wp_nonce_field('woocommerce-shipping-calculator', 'woocommerce-shipping-calculator-nonce'); ?>
+                    </section>
+                </form>
+
+            </td>
+        </tr>
+
+        <style>
+            .shipping-address-row select {
+                min-height: 50px !important;
+            }
+        </style>
+<?php
+    }
+
+    /**
+     * Save the custom shipping field value to the customer session.
+     *
+     * @since 1.0.0
+     */
+    public function save_custom_shipping_field_to_session()
+    {
+        if (isset($_POST['shipping_address_1'])) {
+            $shipping_address_1 = sanitize_text_field($_POST['shipping_address_1']);
+            WC()->customer->set_shipping_address_1($shipping_address_1);
+            WC()->customer->save();
+
+            // Set shipping address in the WooCommerce session
+            WC()->session->set('customer', array_merge(
+                WC()->session->get('customer', []),
+                ['shipping_address_1' => sanitize_text_field($shipping_address_1)]
+            ));
+        }
     }
 
     /**
