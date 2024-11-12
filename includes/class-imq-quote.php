@@ -35,7 +35,7 @@ class Integrity_Mp_Quote
         // add_action('woocommerce_account_view-quote_endpoint', array($this, 'my_account_view_quote_content'));
         add_action('wp', array($this, 'get_quote_request'));
 
-        add_filter('page_template', array($this, 'complete_quote_page_template'));
+        // add_filter('page_template', array($this, 'complete_quote_page_template'));
         add_action('before_delete_post', array($this, 'delete_quote_product_lookup'));
         add_filter('template_include', array($this, 'single_quote_invoice_view'));
     }
@@ -311,7 +311,6 @@ class Integrity_Mp_Quote
      */
     public function get_quote_request()
     {
-
         if (!is_user_logged_in() || is_admin() || !isset($_GET['quote_request']) || $_GET['quote_request'] != 'true') return;
         if (WC()->cart->get_cart_contents_count() <= 0) {
             wc_add_notice('The cart is empty. Please add some products.', 'error');
@@ -322,7 +321,6 @@ class Integrity_Mp_Quote
 
         $cart_items = WC()->cart->get_cart();
         $quote = new IMQ_Quote();
-
 
         $shipping_address = [
             'first_name' => WC()->session->get('customer')['shipping_first_name'],
@@ -344,10 +342,11 @@ class Integrity_Mp_Quote
             $quote->add_product($product_id, $quantity);
         }
 
-        $quote->save();
+        $quote_id = $quote->save();
         WC()->cart->empty_cart();
 
-        wp_redirect(home_url('complete-quote'));
+        $quote_invoice_view = esc_url(wc_get_account_endpoint_url('view-quote') . $quote_id);
+        wp_redirect($quote_invoice_view);
         exit;
     }
 
