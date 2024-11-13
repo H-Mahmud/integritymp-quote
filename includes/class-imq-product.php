@@ -39,6 +39,7 @@ class Integrity_Mp_Quote_Product
         add_filter('woocommerce_product_importer_parsed_data',  array($this, 'custom_woocommerce_product_import_images'), 10, 2);
         add_action('woocommerce_cart_totals_before_order_total', array($this, 'add_cart_totals_shipping_address'));
         add_action('woocommerce_calculated_shipping', array($this, 'save_custom_shipping_field_to_session'));
+        add_action('add_attachment', array($this, 'store_file_name_in_postmeta'));
     }
 
 
@@ -272,7 +273,6 @@ class Integrity_Mp_Quote_Product
         if (isset($parsed_data['raw_gallery_image_ids'])) {
             $parsed_data['raw_gallery_image_ids'] = $this->custom_process_product_import_images($parsed_data['raw_gallery_image_ids']);
         }
-
         return $parsed_data;
     }
 
@@ -288,20 +288,42 @@ class Integrity_Mp_Quote_Product
      */
     private function custom_process_product_import_images($images)
     {
-        $images_base_url = site_url('/wp-content/product-images/');
-
         if (is_string($images)) {
-            return filter_var($images, FILTER_VALIDATE_URL) ? $images : $images_base_url . $images;
+            return filter_var($images, FILTER_VALIDATE_URL) ? $images : $this->get_attachment_url_by__filename($images);
         }
 
         $image_urls = [];
         foreach ($images as $filename) {
-            $image_urls[] = filter_var($filename, FILTER_VALIDATE_URL) ? $filename : $images_base_url . $filename;
+            $image_urls[] = filter_var($filename, FILTER_VALIDATE_URL) ? $filename : $this->get_attachment_url_by__filename($filename);
         }
 
         return $image_urls;
     }
 
+    /**
+     * Retrieves the URL of an attachment by its filename, by querying the database directly for performance.
+     *
+     * @param string $filename The filename of the attachment to retrieve the URL for.
+     *
+     * @return string|false The URL of the attachment if found, otherwise false.
+     */
+    private function get_attachment_url_by__filename($filename)
+    {
+        global $wpdb;
+
+        $attachment_id = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_imq_filename' AND meta_value = %s",
+                sanitize_file_name($filename)
+            )
+        );
+
+        if ($attachment_id) {
+            return wp_get_attachment_url($attachment_id);
+        }
+
+        return false;
+    }
 
     /**
      * Adds a shipping address row to the cart totals table.
@@ -419,6 +441,22 @@ class Integrity_Mp_Quote_Product
                 WC()->session->get('customer', []),
                 ['shipping_address_1' => sanitize_text_field($shipping_address_1)]
             ));
+        }
+    }
+
+    /**
+     * Store the file name in postmeta when an attachment is added.
+     *
+     * @param int $attachment_ID The attachment ID.
+     *
+     * @since 1.0.0
+     */
+    public function store_file_name_in_postmeta($attachment_ID)
+    {
+        $attachment = get_post($attachment_ID);
+        if ($attachment) {
+            $file_name = basename(get_attached_file($attachment_ID));
+            update_post_meta($attachment_ID, '_imq_filename', $file_name);
         }
     }
 
