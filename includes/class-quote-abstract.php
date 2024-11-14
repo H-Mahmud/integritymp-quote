@@ -325,6 +325,7 @@ abstract class IMQ_Abstract_Quote
     {
         $price_level = get_user_meta($this->get_customer_id(), 'price_level', true);
         update_post_meta($this->get_id(), '_price_level', $price_level);
+        $this->data['price_level'] = $price_level;
     }
 
     /**
@@ -401,8 +402,8 @@ abstract class IMQ_Abstract_Quote
             '%d', // customer_id
             '%s', // date_created
             '%d',  // product_qty
-            '%d',  // price
-            '%d',  // quote_price
+            '%f',  // price
+            '%f',  // quote_price
             '%s'  // price_level
         ]);
 
