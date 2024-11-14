@@ -24,7 +24,6 @@ class IMQ_OTP_Verification
         add_action('init', array($this, 'start_session_on_init'));
         add_action('woocommerce_register_form', array($this,  'opt_verification_registration_fields_after_email'), 20);
         add_filter('woocommerce_registration_errors',  array($this, 'otp_verification_registration_errors'), 100, 3);
-        add_action('wp_head', array($this, 'otp_input_show_hide'), 20);
     }
 
     /**
@@ -59,28 +58,15 @@ class IMQ_OTP_Verification
                 'placeholder' => __('Enter OTP', 'integritymp-quote'),
                 'clear'       => true,
             ];
-            woocommerce_form_field('otp', $otp_field, $_POST['otp'] ?? '');
+            if (count($_POST) === 0) {
+                unset($_SESSION['imq_user_otp']);
+                unset($_SESSION['imq_user_email']);
+            }
+            if (isset($_SESSION['imq_user_otp'])) {
+                woocommerce_form_field('otp', $otp_field, $_POST['otp'] ?? '');
+            }
         }
     }
-
-
-    public function otp_input_show_hide()
-    {
-        if (empty($_POST)) {
-            unset($_SESSION['imq_user_otp']);
-            unset($_SESSION['imq_user_email']);
-        }
-        if (!isset($_SESSION['imq_user_otp'])) {
-            echo <<<HTML
-            <style>
-                #otp_field {
-                    display: none;
-                }
-            </style>
-            HTML;
-        }
-    }
-
 
     /**
      * Adds an error to the WooCommerce registration errors object if the OTP sent to the user does not match the one entered.
@@ -99,15 +85,24 @@ class IMQ_OTP_Verification
      */
     public function otp_verification_registration_errors($validation_errors, $username, $email)
     {
+        if ($validation_errors->errors) return $validation_errors;
+
         if (isset($_SESSION['imq_user_otp']) && isset($_SESSION['imq_user_email'])) {
+
+            $email = sanitize_email($_POST['email']);
+            $stored_email = $_SESSION['imq_user_email'];
+            if ($email != $stored_email) {
+                $this->send_otp_to_email($email);
+                wc_add_notice(__('An OTP has been sent to your new email. Please enter it below.', 'integritymp-quote'), 'notice');
+                $validation_errors->add('otp_error', __('', 'integritymp-quote'));
+                return $validation_errors;
+            }
+
             if (isset($_POST['otp']) && ! empty($_POST['otp'])) {
                 $user_otp = sanitize_text_field($_POST['otp']);
                 $stored_otp = $_SESSION['imq_user_otp'];
 
-                $user_email = $_POST['email'];
-                $stored_email = $_SESSION['imq_user_email'];
-
-                if ($user_otp == $stored_otp && $user_email == $stored_email) {
+                if ($user_otp == $stored_otp) {
                     unset($_SESSION['imq_user_otp']);
                     unset($_SESSION['imq_user_email']);
                     return $validation_errors;
@@ -118,13 +113,11 @@ class IMQ_OTP_Verification
                 $validation_errors->add('otp_error', __('Please enter the OTP sent to your email.', 'integritymp-quote'));
             }
         } else {
-            if (isset($_POST['email']) && ! empty($_POST['email'])) {
-                $email = sanitize_email($_POST['email']);
-                $this->send_otp_to_email($email);
+            $email = sanitize_email($_POST['email']);
+            $this->send_otp_to_email($email);
 
-                wc_add_notice(__('An OTP has been sent to your email. Please enter it below.', 'woocommerce'), 'notice');
-                $validation_errors->add('otp_error', __('', 'integritymp-quote'));
-            }
+            wc_add_notice(__('An OTP has been sent to your email. Please enter it below.', 'integritymp-quote'), 'notice');
+            $validation_errors->add('otp_error', __('', 'integritymp-quote'));
         }
         return $validation_errors;
     }
