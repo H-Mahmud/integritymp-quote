@@ -48,3 +48,38 @@ function imq_get_attribute_id_by_slug($slug)
 
     return null;
 }
+
+
+add_action('wp_head', function () {
+    if (!is_shop()) return;
+?>
+    <style>
+        body .site-content {
+            visibility: hidden;
+        }
+
+        body.show-shop .site-content {
+            visibility: visible !important;
+        }
+
+        body.woocommerce-shop.product-category-exists #secondary {
+            display: none !important;
+        }
+
+        body.woocommerce-shop.product-category-exists #primary {
+            width: 100%;
+            border-left: 0 !important;
+        }
+    </style>
+
+    <script>
+        jQuery(document).ready(function($) {
+            if ($("body.woocommerce-shop .ast-woocommerce-container li.product-category.product").length) {
+                $("body").addClass("product-category-exists");
+
+            }
+            $("body").addClass("show-shop");
+        });
+    </script>
+<?php
+});
