@@ -586,6 +586,7 @@ class Integrity_Mp_Quote_Customer_Account
     public function restrict_woocommerce_to_verified_users()
     {
         if (!is_user_logged_in()) {
+            wc_add_notice('Please create an account to access the store. If you already have an account, please login.', 'error');
             wp_redirect(get_permalink(wc_get_page_id('myaccount')));
             exit;
         }
@@ -611,7 +612,7 @@ class Integrity_Mp_Quote_Customer_Account
      */
     public function apply_woocommerce_restrictions()
     {
-        if (is_shop() || is_product_category() || is_product() || is_cart() || is_checkout()) {
+        if (is_shop() || is_product_category() || is_product() || is_cart() || is_checkout() || is_page('product-categories')) {
             $this->restrict_woocommerce_to_verified_users();
         }
     }

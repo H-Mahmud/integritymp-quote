@@ -2,6 +2,7 @@
 defined('ABSPATH') || exit;
 
 if (!is_user_logged_in()) {
+    wc_add_notice('Please create an account to access the store. If you already have an account, please login.', 'error');
     wp_redirect(wc_get_account_endpoint_url('my-account'));
     exit;
 }
