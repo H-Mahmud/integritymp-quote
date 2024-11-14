@@ -462,6 +462,7 @@ class Integrity_Mp_Quote_Customer_Account
             'meta_key' => 'verification_status',
             'meta_value' => 'unverified'
         ]));
+        if (!$count) return;
 
         foreach ($menu as $key => $value) {
             if ($menu[$key][2] == 'users.php') {
