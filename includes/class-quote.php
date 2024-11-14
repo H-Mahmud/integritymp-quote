@@ -30,8 +30,9 @@ class IMQ_Quote extends IMQ_Abstract_Quote
     public function get_price_level_label()
     {
         $price_level = parent::get_price_level();
+
         switch ($price_level) {
-            case '_price_level_2':
+            case '_price_level_1':
                 $label = 'Level 1';
                 break;
             case '_price_level_2':
