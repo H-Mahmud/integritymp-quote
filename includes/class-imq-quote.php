@@ -319,19 +319,28 @@ class Integrity_Mp_Quote
             exit;
         }
 
+        $customer_id = get_current_user_id();
+        $first_name = get_user_meta($customer_id, 'first_name', true);
+        $last_name = get_user_meta($customer_id, 'last_name', true);
+        $business_name = get_user_meta($customer_id, 'business_name', true);
+        $business_address = get_user_meta($customer_id, 'business_address', true);
+        $business_location = get_user_meta($customer_id, 'business_location', true);
+        $phone = get_user_meta($customer_id, 'phone', true);
+
         $cart_items = WC()->cart->get_cart();
         $quote = new IMQ_Quote();
 
         $shipping_address = [
-            'first_name' => WC()->session->get('customer')['shipping_first_name'],
-            'last_name' => WC()->session->get('customer')['shipping_last_name'],
-            'company' => WC()->session->get('customer')['shipping_company'],
-            'address_1' => WC()->session->get('customer')['shipping_address_1'],
-            'address_2' => WC()->session->get('customer')['shipping_address_2'],
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'company' => $business_name,
+            'address_1' => $business_address,
+            'address_2' => $business_location,
             'city' => WC()->session->get('customer')['shipping_country'],
             'state' => WC()->session->get('customer')['shipping_state'],
             'postcode' => WC()->session->get('customer')['shipping_postcode'],
             'country' => WC()->session->get('customer')['shipping_country'],
+            'phone' => $phone
         ];
         $quote->add_shipping($shipping_address);
 
@@ -354,7 +363,6 @@ class Integrity_Mp_Quote
         wp_redirect($quote_invoice_view);
         exit;
     }
-
 
 
     /**
