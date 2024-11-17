@@ -34,3 +34,4 @@ require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-quote-items.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-quote-shipping.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-quote-abstract.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-quote.php';
+require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-product-category-filter.php';
