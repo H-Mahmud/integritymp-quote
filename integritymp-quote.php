@@ -35,3 +35,11 @@ require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-quote-shipping.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-quote-abstract.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-quote.php';
 require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-product-category-filter.php';
+require_once IMQ_PLUGIN_DIR_PATH . 'includes/class-cart-content.php';
+
+
+add_action('wp_enqueue_scripts', 'imq_enqueue_scripts');
+function imq_enqueue_scripts()
+{
+    wp_enqueue_style('imq-style', IMQ_PLUGIN_DIR_URL . '/assets/imq-style.css');
+}
