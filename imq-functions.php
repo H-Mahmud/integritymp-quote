@@ -49,10 +49,9 @@ function imq_get_attribute_id_by_slug($slug)
     return null;
 }
 
-
+/*
 add_action('wp_head', function () {
     if (!is_shop()) return;
-?>
     <style>
         body .site-content {
             visibility: hidden;
@@ -81,5 +80,32 @@ add_action('wp_head', function () {
             $("body").addClass("show-shop");
         });
     </script>
-<?php
+
 });
+*/
+
+/**
+ * Retrieves the price for the given product ID based on the customer's price level.
+ *
+ * If the customer has a price level set, this function will first look for a meta value
+ * with the key set to the price level. If that value exists, it will be returned.
+ *
+ * If no price level is set, or if the price level meta value does not exist, this function
+ * will fall back to retrieving the product's regular price.
+ *
+ * @param int $product_id The ID of the product.
+ *
+ * @return float The price of the product based on the customer's price level.
+ */
+function get_quote_price($product_id)
+{
+
+    if (!is_user_logged_in() || get_user_meta(get_current_user_id(), 'verification_status', true) !== 'verified') return false;
+
+    $price_level = get_user_meta(get_current_user_id(), 'price_level', true);
+    if (!$price_level) return false;
+
+    $price = get_post_meta($product_id, $price_level, true);
+    if (!$price) false;
+    return $price;
+}
