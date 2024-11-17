@@ -37,7 +37,7 @@ class Integrity_Mp_Quote_Product
         add_filter('woocommerce_csv_product_import_mapping_default_columns', array($this, 'set_default_csv_mapping_for_custom_fields'));
 
         add_filter('woocommerce_product_importer_parsed_data',  array($this, 'custom_woocommerce_product_import_images'), 10, 2);
-        add_action('woocommerce_cart_totals_before_order_total', array($this, 'add_cart_totals_shipping_address'));
+        // add_action('woocommerce_cart_totals_before_order_total', array($this, 'add_cart_totals_shipping_address'));
         add_action('woocommerce_calculated_shipping', array($this, 'save_custom_shipping_field_to_session'));
         add_action('add_attachment', array($this, 'store_file_name_in_postmeta'));
     }
