@@ -1,6 +1,7 @@
 .imq-steps-wrapper {
     position: relative;
     margin: 3em auto;
+    margin-bottom: 4em;
     width: 100%;
     max-width: 50em;
 }
@@ -32,6 +33,7 @@
     color: #4981C6;
     font-size: 14px;
     text-align: center;
+    font-weight: 600;
 }
 
 .imq-steps-wrapper .steps__step-number {
@@ -49,4 +51,47 @@
         width: 70%;
         left: 12%;
     }
+}
+
+.imq-cart-header {
+    margin: 1rem 0;
+}
+
+.imq-cart-header .links .continue-shopping {
+    color: #4981C6;
+    font-weight: 600;
+}
+
+.imq-cart-header .continue-shopping span.imq-arrow-left {
+    background-image: url('data:image/svg+xml,<svg width="168px" height="168px" viewBox="0 0 1024.00 1024.00" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="%234981C6" stroke="%234981C6" stroke-width="102.4"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M768 903.232l-50.432 56.768L256 512l461.568-448 50.432 56.768L364.928 512z" fill="%234981C6"></path></g></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.woocommerce-cart table.shop_table {
+    border-width: 0 0 1px 0 !important;
+}
+
+.woocommerce-cart table.shop_table thead {
+    background-color: #F7F7F8 !important;
+}
+
+.woocommerce-cart table.shop_table thead>tr> {
+    border-bottom: unset !important;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.woocommerce-cart .cart_totals {
+    border: unset !important;
+    background-color: #F7F7F8;
+}
+
+.woocommerce-cart .cart_totals h2 {
+    background-color: transparent !important;
+    padding-top: 1rem;
 }

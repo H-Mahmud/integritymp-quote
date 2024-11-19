@@ -23,6 +23,11 @@ class IMQ_Cart_Content
     private final function __construct()
     {
         add_action('woocommerce_before_cart', array($this, 'cart_page_steps'));
+        add_action('woocommerce_before_cart_table', array($this, 'imq_cart_page_steps'));
+        add_action('wp_enqueue_scripts', array($this, 'imq_enqueue_scripts'));
+
+        add_filter('woocommerce_product_single_add_to_cart_text', array($this, 'add_to_cart_button_text'));
+        add_filter('woocommerce_product_add_to_cart_text', array($this, 'archive_add_to_quote_button_text'));
     }
 
     public function cart_page_steps()
@@ -47,7 +52,66 @@ class IMQ_Cart_Content
             </div>
         </div>
 
+    <?php
+    }
+
+
+    /**
+     * Adds the top header to the cart page, containing a button to continue shopping
+     * and a button to empty the cart.
+     *
+     * @since 1.0
+     */
+    public function imq_cart_page_steps()
+    {
+
+    ?>
+        <div class="imq-cart-header">
+            <div class="links">
+                <a class="continue-shopping" href="<?php echo get_permalink(wc_get_page_id('shop')); ?>"><span class="imq-arrow-left"></span> Continue shipping</a>
+                <a href="" class="empty-cart"></a>
+            </div>
+        </div>
+
 <?php
+    }
+
+    /**
+     * Enqueues the styles required for the IMQ cart page.
+     *
+     * This function is hooked to the 'wp_enqueue_scripts' action
+     * to include the main stylesheet for the IMQ plugin.
+     *
+     * @since 1.0
+     */
+    public function imq_enqueue_scripts()
+    {
+        wp_enqueue_style('imq-style', IMQ_PLUGIN_DIR_URL . '/assets/imq-style.css');
+    }
+
+    /**
+     * Filters the 'Add to cart' button text for single product view to 'Add to Quote'.
+     *
+     * @return string The 'Add to cart' button text for single product view.
+     * @since 1.0
+     */
+    public function add_to_cart_button_text()
+    {
+        return __('Add to Quote', 'woocommerce');
+    }
+
+    // Change Button Text in Archive Pages
+
+
+    /**
+     * Filters the 'Add to cart' button text in archive pages to 'Add to Quote'.
+     *
+     * @return string The 'Add to cart' button text in archive pages.
+     * @since 1.0
+     */
+    public function archive_add_to_quote_button_text()
+    {
+        return __('Add to Quote', 'woocommerce');
     }
 
 
