@@ -28,6 +28,8 @@ class IMQ_Cart_Content
 
         add_filter('woocommerce_product_single_add_to_cart_text', array($this, 'add_to_cart_button_text'));
         add_filter('woocommerce_product_add_to_cart_text', array($this, 'archive_add_to_quote_button_text'));
+
+        add_action('init', array($this, 'clear_cart_session'), 20);
     }
 
     public function cart_page_steps()
@@ -65,11 +67,22 @@ class IMQ_Cart_Content
     public function imq_cart_page_steps()
     {
 
+        $cart_url = wc_get_page_permalink('cart');
+        $queries = array(
+            'clear_cart' => 'true',
+            'clear_cart_nonce' => wp_create_nonce('clear_cart')
+        );
+        $url = add_query_arg($queries, $cart_url);
     ?>
         <div class="imq-cart-header">
             <div class="links">
                 <a class="continue-shopping" href="<?php echo get_permalink(wc_get_page_id('shop')); ?>"><span class="imq-arrow-left"></span> Continue shipping</a>
-                <a href="" class="empty-cart"></a>
+                <a href="<?php echo $url; ?>" class="empty-cart">
+                    <svg class="" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z" />
+                    </svg>
+                    Clear Cart
+                </a>
             </div>
         </div>
 
@@ -114,6 +127,25 @@ class IMQ_Cart_Content
         return __('Add to Quote', 'woocommerce');
     }
 
+    /**
+     * Clears the cart session and redirects to the cart page.
+     *
+     * This function is hooked to the 'init' action and will clear the cart session
+     * and redirect to the cart page if the correct parameters are passed in the
+     * GET request. Specifically, it requires the 'clear_cart' and 'clear_cart_nonce'
+     * parameters to be present and for the nonce to be valid.
+     *
+     * @since 1.0
+     */
+    public function clear_cart_session()
+    {
+
+        if (is_admin() || !isset($_GET['clear_cart']) || !isset($_GET['clear_cart_nonce']) || !wp_verify_nonce($_GET['clear_cart_nonce'], 'clear_cart')) return;
+
+        WC()->cart->empty_cart();
+        wp_redirect(get_permalink(wc_get_page_id('cart')));
+        exit;
+    }
 
     /**
      * Gets the singleton instance of the class.
