@@ -29,6 +29,9 @@ class IMQ_Cart_Content
         add_filter('woocommerce_product_single_add_to_cart_text', array($this, 'add_to_cart_button_text'));
         add_filter('woocommerce_product_add_to_cart_text', array($this, 'archive_add_to_quote_button_text'));
 
+        add_action('woocommerce_after_cart_totals', array($this, 'cart_totals_need_help'), 20);
+
+
         add_action('init', array($this, 'clear_cart_session'), 20);
         add_action('init', array($this, 'save_cart_session_favorites'), 20);
     }
@@ -194,6 +197,22 @@ class IMQ_Cart_Content
 
         wp_redirect(get_permalink(wc_get_page_id('cart')));
         exit;
+    }
+
+    /**
+     * Prints a message to the user with a phone number to call for help.
+     *
+     * This function is hooked to the 'woocommerce_cart_totals_after_order_total' action.
+     *
+     * @since 1.0
+     */
+    public function cart_totals_need_help()
+    {
+        echo <<<HTML
+            <h4 class="need-help">Need Help? <br>
+                Call jeff at 727-244-2013
+            </h4>
+            HTML;
     }
 
     /**
