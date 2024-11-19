@@ -30,6 +30,8 @@ class IMQ_Cart_Content
         add_filter('woocommerce_product_add_to_cart_text', array($this, 'archive_add_to_quote_button_text'));
 
         add_action('woocommerce_after_cart_totals', array($this, 'cart_totals_need_help'), 20);
+        add_filter('gettext', array($this, 'change_cart_totals_heading'), 20, 3);
+
 
 
         add_action('init', array($this, 'clear_cart_session'), 20);
@@ -213,6 +215,28 @@ class IMQ_Cart_Content
                 Call jeff at 727-244-2013
             </h4>
             HTML;
+    }
+
+
+    /**
+     * Modifies the string "Cart totals" to "Quote Summary" in the cart totals table.
+     *
+     * This function is hooked to the 'gettext' filter.
+     *
+     * @since 1.0
+     *
+     * @param string $translated_text The translated text to be modified.
+     * @param string $text The original text that was translated.
+     * @param string $domain The textdomain that the text was translated from.
+     *
+     * @return string The modified translated text.
+     */
+    public function change_cart_totals_heading($translated_text, $text, $domain)
+    {
+        if ($text === 'Cart totals' && $domain === 'woocommerce') {
+            $translated_text = 'Quote Summary';
+        }
+        return $translated_text;
     }
 
     /**
