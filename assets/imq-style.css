@@ -159,3 +159,31 @@
     top: 4px;
     left: 4px;
 }
+
+/**
+Archive page cart quantity input
+*/
+.archive .price {
+    display: block;
+}
+
+.archive .quantity {
+    display: inline-block;
+    float: right;
+    width: 90px;
+    margin-top: 12px;
+}
+
+.archive .add_to_cart_button {
+    display: inline-block;
+    float: right;
+}
+
+/**
+Fix Shop page container width issue
+*/
+@media (min-width: 768px) {
+    .elementor-2496 .elementor-element.elementor-element-f9ae719 {
+        width: 76.6666%;
+    }
+}

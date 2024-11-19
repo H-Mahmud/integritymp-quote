@@ -45,6 +45,9 @@ class Integrity_Mp_Quote_Product
         add_action('add_attachment', array($this, 'store_file_name_in_postmeta'));
 
         add_filter('astra_addon_shop_cards_buttons_html', array($this, 'replace_floating_add_to_cart_with_wishlist'), 15, 2);
+
+        add_action('woocommerce_after_shop_loop_item', array($this, 'shop_page_add_quantity_field'), 11);
+        add_action('init', array($this,  'shop_page_quantity_add_to_cart_handler'));
     }
 
 
@@ -485,6 +488,55 @@ class Integrity_Mp_Quote_Product
         return do_shortcode('[yith_wcwl_add_to_wishlist]');
     }
 
+
+    /**
+     * Add a quantity field on the shop page.
+     *
+     * If the product is not sold individually, is not a variable product, and
+     * is purchasable, we add a quantity field to the shop page.
+     *
+     * @since 1.0.0
+     */
+    public function shop_page_add_quantity_field()
+    {
+        $product = wc_get_product(get_the_ID());
+
+        if (! $product->is_sold_individually() && 'variable' != $product->get_type() && $product->is_purchasable()) {
+            woocommerce_quantity_input(array('min_value' => 1, 'max_value' => $product->backorders_allowed() ? '' : $product->get_stock_quantity()));
+        }
+    }
+
+    /**
+     * Handles the add to cart button for products on the shop page when quantity is involved.
+     *
+     * This function is hooked into `wp_footer` and enqueues some JavaScript to alter the
+     * behavior of the add to cart button. It prevents the default behavior of the input
+     * field (which is to enter the quantity) and instead triggers a click on the add to
+     * cart button when Enter is pressed. Additionally, it updates the quantity in the
+     * button's href attribute for non-AJAX add to cart.
+     */
+    public function shop_page_quantity_add_to_cart_handler()
+    {
+
+        wc_enqueue_js('
+            $(".woocommerce .products").on("click", ".quantity input", function() {
+                return false;
+            });
+            $(".woocommerce .products").on("change input", ".quantity .qty", function() {
+                var add_to_cart_button = $(this).parents(".product").find(".add_to_cart_button");
+                // For AJAX add-to-cart actions
+                add_to_cart_button.attr("data-quantity", $(this).val());
+                // For non-AJAX add-to-cart actions
+                add_to_cart_button.attr("href", "?add-to-cart=" + add_to_cart_button.attr("data-product_id") + "&quantity=" + $(this).val());
+            });
+            // Trigger on Enter press
+            $(".woocommerce .products").on("keypress", ".quantity .qty", function(e) {
+                if ((e.which||e.keyCode) === 13) {
+                    $( this ).parents(".product").find(".add_to_cart_button").trigger("click");
+                }
+            });
+        ');
+    }
 
 
     /**
