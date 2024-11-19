@@ -218,24 +218,35 @@ class IMQ_Cart_Content
     }
 
 
+
     /**
-     * Modifies the string "Cart totals" to "Quote Summary" in the cart totals table.
+     * Modifies the cart totals heading text to replace "Cart" with "Quote" and other
+     * related phrases.
      *
-     * This function is hooked to the 'gettext' filter.
-     *
-     * @since 1.0
-     *
-     * @param string $translated_text The translated text to be modified.
-     * @param string $text The original text that was translated.
-     * @param string $domain The textdomain that the text was translated from.
+     * @param string $translated_text The translated text to modify.
+     * @param string $text The original untranslated text.
+     * @param string $domain The text domain.
      *
      * @return string The modified translated text.
+     *
+     * @since 1.0
      */
     public function change_cart_totals_heading($translated_text, $text, $domain)
     {
-        if ($text === 'Cart totals' && $domain === 'woocommerce') {
-            $translated_text = 'Quote Summary';
+        $replacements = [
+            'Cart'          => 'Quote',
+            'Add to cart'   => 'Add to Quote',
+            'View cart'     => 'View Quote',
+            'Proceed to checkout' => 'Submit Quote',
+            'Quote totals'   => 'Quote Summary',
+        ];
+
+        if ($domain === 'woocommerce') {
+            foreach ($replacements as $original => $replacement) {
+                $translated_text = str_ireplace($original, $replacement, $translated_text);
+            }
         }
+
         return $translated_text;
     }
 
