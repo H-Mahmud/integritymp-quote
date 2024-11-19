@@ -73,16 +73,34 @@ class IMQ_Cart_Content
             'clear_cart_nonce' => wp_create_nonce('clear_cart')
         );
         $url = add_query_arg($queries, $cart_url);
+
+        $save_cart_queries = array(
+            'save_cart' => 'true',
+            'save_cart_nonce' => wp_create_nonce('save_cart')
+        );
+
+        $save_cart_url = add_query_arg($save_cart_queries, $cart_url);
     ?>
         <div class="imq-cart-header">
             <div class="links">
                 <a class="continue-shopping" href="<?php echo get_permalink(wc_get_page_id('shop')); ?>"><span class="imq-arrow-left"></span> Continue shipping</a>
-                <a href="<?php echo $url; ?>" class="empty-cart">
-                    <svg class="" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z" />
-                    </svg>
-                    Clear Cart
-                </a>
+                <div class="link-right">
+                    <a href="<?php echo $url; ?>" class="empty-cart">
+                        <svg class="" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z" />
+                        </svg>
+                        Clear Cart
+                    </a>
+                    <?php if (defined('YITH_WCWL_VERSION')): ?>
+                        <a href="<?php echo $save_cart_url; ?>" class="save-cart">
+                            <svg fill="#4981C6" width="92" height="92" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 4v16c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2V8a.997.997 0 0 0-.293-.707l-5-5A.996.996 0 0 0 14 2H6c-1.103 0-2 .897-2 2zm14 4.414L18.001 20H6V4h7.586L18 8.414z" />
+                                <path d="M8 6h2v4H8zm4 0h2v4h-2z" />
+                            </svg>
+                            Save Cart
+                        </a>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
 
