@@ -95,3 +95,9 @@
     background-color: transparent !important;
     padding-top: 1rem;
 }
+
+.products .yith-add-to-wishlist-button-block {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+}

@@ -1,4 +1,7 @@
 <?php
+
+use WP_Forge\Helpers\Arr;
+
 defined('ABSPATH') || exit;
 /**
  * Integrity_Mp_Quote_Product class.
@@ -40,6 +43,8 @@ class Integrity_Mp_Quote_Product
         // add_action('woocommerce_cart_totals_before_order_total', array($this, 'add_cart_totals_shipping_address'));
         add_action('woocommerce_calculated_shipping', array($this, 'save_custom_shipping_field_to_session'));
         add_action('add_attachment', array($this, 'store_file_name_in_postmeta'));
+
+        add_filter('astra_addon_shop_cards_buttons_html', array($this, 'replace_floating_add_to_cart_with_wishlist'), 15, 2);
     }
 
 
@@ -459,6 +464,28 @@ class Integrity_Mp_Quote_Product
             update_post_meta($attachment_ID, '_imq_filename', $file_name);
         }
     }
+
+
+    /**
+     * Replaces the floating add to cart button with a wishlist button.
+     *
+     * This function is hooked into `woocommerce_loop_add_to_cart_link` and
+     * replaces the add to cart button on the shop page with a wishlist button.
+     *
+     * @param string $markup The HTML markup for the add to cart button.
+     * @param WC_Product $product The product object.
+     *
+     * @return string The HTML markup for the wishlist button.
+     */
+    public function replace_floating_add_to_cart_with_wishlist($markup, $product)
+    {
+        if (!defined('YITH_WCWL_VERSION')) return $markup;
+        remove_action('woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart', 10);
+
+        return do_shortcode('[yith_wcwl_add_to_wishlist]');
+    }
+
+
 
     /**
      * Gets the singleton instance of the class.
