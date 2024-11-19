@@ -30,6 +30,7 @@ class IMQ_Cart_Content
         add_filter('woocommerce_product_add_to_cart_text', array($this, 'archive_add_to_quote_button_text'));
 
         add_action('init', array($this, 'clear_cart_session'), 20);
+        add_action('init', array($this, 'save_cart_session_favorites'), 20);
     }
 
     public function cart_page_steps()
@@ -161,6 +162,36 @@ class IMQ_Cart_Content
         if (is_admin() || !isset($_GET['clear_cart']) || !isset($_GET['clear_cart_nonce']) || !wp_verify_nonce($_GET['clear_cart_nonce'], 'clear_cart')) return;
 
         WC()->cart->empty_cart();
+        wp_redirect(get_permalink(wc_get_page_id('cart')));
+        exit;
+    }
+
+
+    /**
+     * Saves the cart session contents to the user's wishlist.
+     *
+     * This function is hooked to the 'init' action and will save the cart session
+     * to the user's wishlist if the correct parameters are passed in the GET
+     * request. Specifically, it requires the 'save_cart' and 'save_cart_nonce'
+     * parameters to be present and for the nonce to be valid.
+     *
+     * @since 1.0
+     */
+    public function save_cart_session_favorites()
+    {
+        if (is_admin() || !isset($_GET['save_cart']) || !isset($_GET['save_cart_nonce']) || !wp_verify_nonce($_GET['save_cart_nonce'], 'save_cart') || !function_exists('yith_wcwl_count_add_to_wishlist')) return;
+
+        $cart_items = WC()->cart->get_cart();
+
+        // Iterate through each cart item
+        foreach ($cart_items as $cart_item_key => $cart_item) {
+            $product_id = $cart_item['product_id'];
+            $product_variation_id = $cart_item['variation_id'];
+            yith_wcwl_count_add_to_wishlist($product_id);
+        }
+
+        wc_add_notice('Your cart has been saved to your favorites!', 'success');
+
         wp_redirect(get_permalink(wc_get_page_id('cart')));
         exit;
     }
