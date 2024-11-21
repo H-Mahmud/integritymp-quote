@@ -31,10 +31,10 @@ class Integrity_Mp_Quote_Customer_Account
         // add_filter('woocommerce_new_customer_data', array($this, 'set_username_for_woocommerce_registration'), 10, 1);
 
 
-        add_action('show_user_profile', array($this, 'show_custom_user_profile_fields'), 10, 1);
-        add_action('edit_user_profile',  array($this, 'show_custom_user_profile_fields'), 10, 1);
-        add_action('personal_options_update', array($this, 'save_custom_user_profile_fields'), 10, 1);
-        add_action('edit_user_profile_update', array($this, 'save_custom_user_profile_fields'), 10, 1);
+        // add_action('show_user_profile', array($this, 'show_custom_user_profile_fields'), 10, 1);
+        // add_action('edit_user_profile',  array($this, 'show_custom_user_profile_fields'), 10, 1);
+        // add_action('personal_options_update', array($this, 'save_custom_user_profile_fields'), 10, 1);
+        // add_action('edit_user_profile_update', array($this, 'save_custom_user_profile_fields'), 10, 1);
 
         add_filter('manage_users_columns', array($this, 'add_users_verification_column'), 10, 1);
         add_filter('manage_users_sortable_columns', array($this, 'user_verification_column_sortable'), 10, 1);
@@ -45,8 +45,8 @@ class Integrity_Mp_Quote_Customer_Account
         add_action('admin_menu', array($this, 'add_unverified_count_badge'));
 
         add_action('user_register', array($this, 'add_default_verification_status'), 10, 1);
-        add_action('show_user_profile', array($this, 'add_verification_status_field'), 10, 1);
-        add_action('edit_user_profile', array($this, 'add_verification_status_field'), 10, 1);
+        add_action('show_user_profile', array($this, 'add_verification_status_field'), 10, 10);
+        add_action('edit_user_profile', array($this, 'add_verification_status_field'), 10, 10);
         add_action('personal_options_update', array($this, 'save_verification_status'), 10, 1);
         add_action('edit_user_profile_update', array($this, 'save_verification_status'), 10, 1);
 
@@ -562,7 +562,7 @@ class Integrity_Mp_Quote_Customer_Account
         $price_level = get_user_meta($user->ID, 'price_level', true);
         $is_tax_exempt = get_user_meta($user->ID, 'tax_exempt', true);
     ?>
-        <h3><?php _e('Verification Status', 'integritymp-quote'); ?></h3>
+        <h3><?php _e('Customer Information', 'integritymp-quote'); ?></h3>
         <table class="form-table">
             <tr>
                 <th><label for="verification_status"><?php _e('Status', 'integritymp-quote'); ?></label></th>
@@ -592,6 +592,17 @@ class Integrity_Mp_Quote_Customer_Account
                     <input type="checkbox" name="tax_exempt" id="tax_exempt" value="1" <?php checked($is_tax_exempt, '1'); ?>>
                     <span class="description"><?php esc_html_e('Check if this customer is tax-exempt.', 'integritymp-quote'); ?></span>
                 </td>
+            </tr>
+
+            <tr>
+                <th><label for="vendor_name"><?php esc_html_e('Vendor Name', 'integritymp-quote'); ?></label></th>
+                <td>
+                    <input type="text" name="vendor_name" id="vendor_name" value="<?php echo esc_attr(get_the_author_meta('vendor_name', $user->ID)); ?>" class="regular-text" />
+                </td>
+            </tr>
+            <tr>
+                <th><label for="vendor_number"><?php esc_html_e('Vendor Number', 'integritymp-quote'); ?></label></th>
+                <td><input type="text" name="vendor_number" id="vendor_number" value="<?php echo esc_attr(get_the_author_meta('vendor_number', $user->ID)); ?>" class="regular-text" /></td>
             </tr>
         </table>
 <?php
@@ -623,6 +634,18 @@ class Integrity_Mp_Quote_Customer_Account
             update_user_meta($user_id, 'tax_exempt', 1);
         } else {
             delete_user_meta($user_id, 'tax_exempt');
+        }
+
+        if (isset($_POST['vendor_name'])) {
+            update_user_meta($user_id, 'vendor_name', $_POST['vendor_name']);
+        } else {
+            delete_user_meta($user_id, 'vendor_name');
+        }
+
+        if (isset($_POST['vendor_number'])) {
+            update_user_meta($user_id, 'vendor_number', $_POST['vendor_number']);
+        } else {
+            delete_user_meta($user_id, 'vendor_number');
         }
     }
 
