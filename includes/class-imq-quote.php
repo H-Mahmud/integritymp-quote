@@ -356,6 +356,13 @@ class Integrity_Mp_Quote
         }
 
         $quote_id = $quote->save();
+        $vendor_name = get_user_meta($quote->get_customer_id(), 'vendor_name', true);
+        $vendor_number = get_user_meta($quote->get_customer_id(), 'vendor_number', true);
+
+        if (!empty($vendor_name) && !empty($vendor_number)) {
+            update_post_meta($quote_id, '_vendor_number', $vendor_number);
+            update_post_meta($quote_id, '_vendor_name', $vendor_name);
+        }
         WC()->cart->empty_cart();
 
         $current_user = wp_get_current_user();

@@ -284,7 +284,14 @@ HTML;
         </dt>
         <dd>This proposal does not include freight.</dd>
         <dd>This proposal does not include installation.</dd>
-        <dd>BayCare's vendor number for Integrity Medical Products is 774121</dd>
+        <?php
+        $vendor_name = get_post_meta($quote->get_id(), '_vendor_name', true);
+        $vendor_number = get_post_meta($quote->get_id(), '_vendor_number', true);
+
+        if (!empty($vendor_name) && !empty($vendor_number)) {
+            echo "<dd>$vendor_name\'s vendor number for Integrity Medical Products is $vendor_number</dd>";
+        }
+        ?>
     </dl>
 
 
