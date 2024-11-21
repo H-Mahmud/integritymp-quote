@@ -320,27 +320,32 @@ class Integrity_Mp_Quote
         }
 
         $customer_id = get_current_user_id();
-        $first_name = get_user_meta($customer_id, 'first_name', true);
-        $last_name = get_user_meta($customer_id, 'last_name', true);
-        $business_name = get_user_meta($customer_id, 'business_name', true);
-        $business_address = get_user_meta($customer_id, 'business_address', true);
-        $business_location = get_user_meta($customer_id, 'business_location', true);
-        $phone = get_user_meta($customer_id, 'phone', true);
+
+        $first_name = get_user_meta($customer_id, 'shipping_first_name', true);
+        $last_name = get_user_meta($customer_id, 'shipping_last_name', true);
+        $shipping_address_1 = get_user_meta($customer_id, 'shipping_address_1', true);
+        $shipping_address_2 = get_user_meta($customer_id, 'shipping_address_2', true);
+        $business_name = get_user_meta($customer_id, 'shipping_company', true);
+        $shipping_city = get_user_meta($customer_id, 'shipping_city', true);
+        $shipping_postcode = get_user_meta($customer_id, 'shipping_postcode', true);
+        $shipping_state = get_user_meta($customer_id, 'shipping_state', true);
+        $shipping_country = get_user_meta($customer_id, 'shipping_country', true);
+        $shipping_phone = get_user_meta($customer_id, 'shipping_phone', true);
 
         $cart_items = WC()->cart->get_cart();
         $quote = new IMQ_Quote();
 
         $shipping_address = [
-            'first_name' => $first_name,
-            'last_name' => $last_name,
-            'company' => $business_name,
-            'address_1' => $business_address,
-            'address_2' => $business_location,
-            'city' => WC()->session->get('customer')['shipping_country'],
-            'state' => WC()->session->get('customer')['shipping_state'],
-            'postcode' => WC()->session->get('customer')['shipping_postcode'],
-            'country' => WC()->session->get('customer')['shipping_country'],
-            'phone' => $phone
+            'first_name'    => $first_name,
+            'last_name'     => $last_name,
+            'address_1'     => $shipping_address_1,
+            'address_2'     => $shipping_address_2,
+            'company'       => $business_name,
+            'city'          => $shipping_city,
+            'postcode'      => $shipping_postcode,
+            'state'         => $shipping_state,
+            'country'       => $shipping_country,
+            'phone'         => $shipping_phone
         ];
         $quote->add_shipping($shipping_address);
 
