@@ -103,8 +103,7 @@ class IMQ_Shipping
      */
     public function get_state_address()
     {
-        // return $this->shipping['city'] . ', ' . $this->shipping['state'] . ' ' . $this->shipping['postcode'];
-        return $this->get_address_2();
+        return $this->shipping['city'] . ', ' . $this->shipping['state'] . ' ' . $this->shipping['postcode'];
     }
 
     /**
