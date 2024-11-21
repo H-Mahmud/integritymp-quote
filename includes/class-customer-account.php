@@ -1,4 +1,5 @@
 <?php
+
 defined('ABSPATH') || exit;
 /**
  * Customer Account
@@ -23,9 +24,12 @@ class Integrity_Mp_Quote_Customer_Account
     private final function __construct()
     {
         add_action('woocommerce_register_form_start', array($this, 'woocommerce_custom_registration_fields'), 10, 0);
-        add_filter('woocommerce_registration_errors', array($this, 'validate_woocommerce_custom_registration_fields'), 10, 3);
+        // add_filter('woocommerce_registration_errors', array($this, 'validate_woocommerce_custom_registration_fields'), 10, 3);
         add_action('woocommerce_created_customer', array($this, 'save_woocommerce_custom_registration_fields'), 10, 1);
-        add_filter('woocommerce_new_customer_data', array($this, 'set_username_for_woocommerce_registration'), 10, 1);
+        add_action('woocommerce_register_post', array($this, 'validate_shipping_fields'), 10, 3);
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_country_state_scripts'));
+        // add_filter('woocommerce_new_customer_data', array($this, 'set_username_for_woocommerce_registration'), 10, 1);
+
 
         add_action('show_user_profile', array($this, 'show_custom_user_profile_fields'), 10, 1);
         add_action('edit_user_profile',  array($this, 'show_custom_user_profile_fields'), 10, 1);
@@ -65,52 +69,70 @@ class Integrity_Mp_Quote_Customer_Account
     public function woocommerce_custom_registration_fields()
     {
         $fields = [
-            'first_name' => [
+            'shipping_first_name' => [
                 'type'        => 'text',
+                'label'       => __('First Name', 'woocommerce'),
                 'required'    => true,
-                'label'       => __('First Name', 'integritymp-quote'),
                 'class'       => ['form-row-first'],
             ],
-            'last_name' => [
+            'shipping_last_name' => [
                 'type'        => 'text',
+                'label'       => __('Last Name', 'woocommerce'),
                 'required'    => true,
-                'label'       => __('Last Name', 'integritymp-quote'),
                 'class'       => ['form-row-last'],
             ],
-            'business_name' => [
+            'shipping_company' => [
                 'type'        => 'text',
+                'label'       => __('Business Name', 'woocommerce'),
                 'required'    => true,
-                'label'       => __('Business Name', 'integritymp-quote'),
-                'class'       => ['form-row-wide'],
             ],
-            'business_location' => [
+            'shipping_address_1' => [
                 'type'        => 'text',
+                'label'       => __('Address Line 1', 'woocommerce'),
                 'required'    => true,
-                'label'       => __('Business Location', 'integritymp-quote'),
-                'class'       => ['form-row-wide'],
+                'class'       => ['form-row-first'],
             ],
-            'business_address' => [
+            'shipping_address_2' => [
                 'type'        => 'text',
+                'label'       => __('Address Line 2', 'woocommerce'),
                 'required'    => true,
-                'label'       => __('Business Address', 'integritymp-quote'),
-                'class'       => ['form-row-wide'],
+                'class'       => ['form-row-last'],
             ],
-            'phone' => [
+            'shipping_city' => [
+                'type'        => 'text',
+                'label'       => __('City', 'woocommerce'),
+                'required'    => true,
+                'class'       => ['form-row-first'],
+            ],
+            'shipping_postcode' => [
+                'type'        => 'text',
+                'label'       => __('Postcode', 'woocommerce'),
+                'required'    => true,
+                'class'       => ['form-row-last'],
+            ],
+            'shipping_country' => [
+                'type'        => 'country',
+                'label'       => __('Country', 'woocommerce'),
+                'required'    => true,
+                'class'       => ['form-row-first wc-enhanced-select'],
+            ],
+            'shipping_state' => [
+                'type'        => 'state',
+                'label'       => __('State', 'woocommerce'),
+                'required'    => true,
+                'class'       => ['form-row-last wc-enhanced-select'],
+            ],
+            'shipping_phone' => [
                 'type'        => 'tel',
+                'label'       => __('Phone', 'woocommerce'),
                 'required'    => true,
-                'label'       => __('Phone', 'integritymp-quote'),
-                'class'       => ['form-row-wide'],
-            ],
-            'username' => [
-                'type'        => 'text',
-                'required'    => true,
-                'label'       => __('Username', 'integritymp-quote'),
-                'class'       => ['form-row-wide'],
-            ],
+            ]
         ];
 
-        foreach ($fields as $key => $field_args) {
-            woocommerce_form_field($key, $field_args, $_POST[$key] ?? '');
+
+        foreach ($fields as $key => $field) {
+            $value = isset($_POST[$key]) ? sanitize_text_field($_POST[$key]) : '';
+            woocommerce_form_field($key, $field, $value);
         }
     }
 
@@ -156,48 +178,78 @@ class Integrity_Mp_Quote_Customer_Account
         return $validation_errors;
     }
 
-
-
     /**
-     * Saves custom WooCommerce registration fields to the user meta when the user is created.
+     * Saves custom registration fields to the user meta when a user is created.
      *
-     * @param int $customer_id The ID of the user being saved.
+     * Checks if the custom fields (shipping first name, shipping last name, shipping address 1, shipping address 2,
+     * shipping company, shipping city, shipping postcode, shipping country, shipping state, and shipping phone)
+     * are set during the user registration process, and if so, saves them to the user meta.
      *
-     * This function checks if the custom fields (first name, last name, business name, business location, business address, and phone)
-     * are set during registration, and if so, saves them to the user meta. It uses the update_user_meta function to
-     * store the values in the meta table.
+     * @param int $customer_id The ID of the user being created.
      */
     public function save_woocommerce_custom_registration_fields($customer_id)
     {
-        if (isset($_POST['first_name'])) {
-            update_user_meta($customer_id, 'first_name', sanitize_text_field($_POST['first_name']));
-            update_user_meta($customer_id, 'shipping_first_name', sanitize_text_field($_POST['first_name']));
-        }
+        $fields = [
+            'shipping_first_name',
+            'shipping_last_name',
+            'shipping_address_1',
+            'shipping_address_2',
+            'shipping_company',
+            'shipping_city',
+            'shipping_postcode',
+            'shipping_country',
+            'shipping_state',
+            'shipping_phone',
+        ];
 
-        if (isset($_POST['last_name'])) {
-            update_user_meta($customer_id, 'last_name', sanitize_text_field($_POST['last_name']));
-            update_user_meta($customer_id, 'shipping_last_name', sanitize_text_field($_POST['last_name']));
-        }
+        foreach ($fields as $field) {
+            if (isset($_POST[$field])) {
+                update_user_meta($customer_id, $field, sanitize_text_field($_POST[$field]));
 
-        if (isset($_POST['business_name'])) {
-            update_user_meta($customer_id, 'business_name', sanitize_text_field($_POST['business_name']));
-            update_user_meta($customer_id, 'shipping_company', sanitize_text_field($_POST['business_name']));
-        }
-
-        if (isset($_POST['business_location']))
-            update_user_meta($customer_id, 'business_location', sanitize_text_field($_POST['business_location']));
-
-        if (isset($_POST['business_address'])) {
-            update_user_meta($customer_id, 'business_address', sanitize_text_field($_POST['business_address']));
-            update_user_meta($customer_id, 'shipping_address_1', sanitize_text_field($_POST['business_address']));
-        }
-
-        if (isset($_POST['phone'])) {
-            update_user_meta($customer_id, 'phone', sanitize_text_field($_POST['phone']));
-            update_user_meta($customer_id, 'shipping_phone', sanitize_text_field($_POST['phone']));
+                if ($field === 'shipping_first_name') {
+                    update_user_meta($customer_id, 'first_name', sanitize_text_field($_POST[$field]));
+                } else if ($field === 'shipping_last_name') {
+                    update_user_meta($customer_id, 'last_name', sanitize_text_field($_POST[$field]));
+                }
+            }
         }
     }
 
+
+    public function validate_shipping_fields($username, $email, $validation_errors)
+    {
+        $required_fields = [
+            'shipping_first_name' => __('First Name', 'woocommerce'),
+            'shipping_last_name'  => __('Last Name', 'woocommerce'),
+            'shipping_address_1'  => __('Address Line 1', 'woocommerce'),
+            'shipping_address_2'  => __('Address Line 2', 'woocommerce'),
+            'shipping_company'    => __('Business Name', 'woocommerce'),
+            'shipping_city'       => __('City', 'woocommerce'),
+            'shipping_postcode'   => __('Postcode', 'woocommerce'),
+            'shipping_country'    => __('Country', 'woocommerce'),
+            'shipping_state'      => __('State', 'woocommerce'),
+            'shipping_phone'      => __('Phone', 'woocommerce'),
+        ];
+
+        foreach ($required_fields as $key => $label) {
+            if (empty($_POST[$key])) {
+                $validation_errors->add($key, sprintf(__('%s is a required field.', 'woocommerce'), $label));
+            }
+        }
+    }
+
+
+    /**
+     * Enqueues the country and state JavaScript and CSS files for the registration form.
+     *
+     * @since 1.0.0
+     */
+    public function enqueue_country_state_scripts()
+    {
+        wp_enqueue_script('wc-country-select');
+        wp_enqueue_script('wc-enhanced-select');
+        wp_enqueue_style('woocommerce-general');
+    }
 
 
     /**
