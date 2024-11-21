@@ -196,7 +196,8 @@ $quote_items = $quote->get_items();
                 $shipping = $quote->get_shipping();
                 $business_name = $shipping->get_company();
                 $full_name = $shipping->get_full_name();
-                $street_address = $shipping->get_address_1();
+                $address_1 = $shipping->get_address_1();
+                $address_2 = $shipping->get_address_2();
                 $state_address = $shipping->get_state_address();
 
                 echo <<<HTML
@@ -205,7 +206,9 @@ $quote_items = $quote->get_items();
                             <br>
                                 $full_name
                             <br>
-                            $street_address
+                            $address_1
+                            <br>
+                            $address_2
                             <br>
                             $state_address
                         </td>
