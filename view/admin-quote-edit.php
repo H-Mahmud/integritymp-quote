@@ -174,6 +174,21 @@ $quote_items = $quote->get_items();
         </div>
     </div>
 
+    <?php
+    $shipping = $quote->get_shipping();
+    $business_name = $shipping->get_company();
+    $full_name = $shipping->get_full_name();
+    $address_1 = $shipping->get_address_1();
+    $address_2 = $shipping->get_address_2();
+    $state_address = $shipping->get_state_address();
+
+
+    $user_profile_url = admin_url('user-edit.php?user_id=' . $quote->get_customer_id());
+    $profile_url = esc_url($user_profile_url);
+    $price_level =  $quote->get_price_level_label();
+    $tax_exempt = $quote->get_tax_exempt();
+
+    echo <<<HTML
     <table class="table quote-to">
         <thead>
             <tr>
@@ -181,41 +196,34 @@ $quote_items = $quote->get_items();
             </tr>
         </thead>
         <tr>
-            <?php
-            $shipping = $quote->get_shipping();
-            ?>
             <td>Customer:</td>
-            <td><?php
-                $user_profile_url = admin_url('user-edit.php?user_id=' . $quote->get_customer_id());
-                echo '<a href="' . esc_url($user_profile_url) . '" target="_blank">' . $shipping->get_full_name() . '</a>';
-                ?></td>
+            <td><a href="$profile_url" target="_blank">$full_name</a></td>
         </tr>
         <tr>
-            <td>
-                Business Name:
-            </td>
-            <td><?php echo $shipping->get_company(); ?></td>
+            <td>Business Name:</td>
+            <td>$business_name</td>
         </tr>
         <tr>
             <td>Price Level:</td>
-            <td><?php echo $quote->get_price_level_label(); ?></td>
+            <td>$price_level</td>
         </tr>
         <tr>
             <td>Tax Exempt:</td>
-            <td><?php echo $quote->get_tax_exempt(); ?></td>
+            <td>$tax_exempt</td>
         </tr>
         <tr>
             <td>Address:</td>
             <td>
-                <?php echo $shipping->get_address_1(); ?>
+                $address_1
                 <br>
-                <?php echo $shipping->get_state_address(); ?>
+                $address_2
+                <br>
+                $state_address
             </td>
         </tr>
 
     </table>
-
-    <?php
+HTML;
     /*
         <table class="table">
             <thead>
