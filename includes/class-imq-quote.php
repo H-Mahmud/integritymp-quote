@@ -230,9 +230,8 @@ class Integrity_Mp_Quote
      */
     public function get_quote_edit_link($quote_id)
     {
-
-        $author_id = get_post_field('post_author', $quote_id);
-        $business_name = get_the_author_meta('business_name', $author_id);
+        $quote = new IMQ_Quote($quote_id);
+        $business_name = $quote->get_shipping()->get_company();
         $quote_tile = '#' . $quote_id . " " . $business_name;
 
         $edit_link = admin_url('admin.php?page=shop-quote&action=edit&id=' . $quote_id);
