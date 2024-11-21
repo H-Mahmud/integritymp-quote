@@ -165,16 +165,19 @@ function imq_quote_email($quote_id)
                     $shipping = $quote->get_shipping();
                     $business_name = $shipping->get_company();
                     $full_name = $shipping->get_full_name();
-                    $street_address = $shipping->get_address_1();
+                    $address_1 = $shipping->get_address_1();
+                    $address_2 = $shipping->get_address_2();
                     $state_address = $shipping->get_state_address();
 
                     echo <<<HTML
                         <td>
                             $business_name
                             <br>
-                                $full_name
+                            $full_name
                             <br>
-                            $street_address
+                            $address_1
+                            <br>
+                            $address_2
                             <br>
                             $state_address
                         </td>
