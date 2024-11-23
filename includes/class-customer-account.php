@@ -95,7 +95,7 @@ class Integrity_Mp_Quote_Customer_Account
             'shipping_address_2' => [
                 'type'        => 'text',
                 'label'       => __('Address Line 2', 'woocommerce'),
-                'required'    => true,
+                'required'    => false,
                 'class'       => ['form-row-last'],
             ],
             'shipping_city' => [
@@ -222,7 +222,6 @@ class Integrity_Mp_Quote_Customer_Account
             'shipping_first_name' => __('First Name', 'woocommerce'),
             'shipping_last_name'  => __('Last Name', 'woocommerce'),
             'shipping_address_1'  => __('Address Line 1', 'woocommerce'),
-            'shipping_address_2'  => __('Address Line 2', 'woocommerce'),
             'shipping_company'    => __('Business Name', 'woocommerce'),
             'shipping_city'       => __('City', 'woocommerce'),
             'shipping_postcode'   => __('Postcode', 'woocommerce'),
