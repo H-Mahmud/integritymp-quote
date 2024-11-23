@@ -53,6 +53,7 @@ class Integrity_Mp_Quote_Customer_Account
         add_action('template_redirect',  array($this, 'apply_woocommerce_restrictions'));
         add_action('woocommerce_product_query', array($this, 'hide_woocommerce_categories'), 10, 1);
         add_action('wp_head', array($this, 'show_unverified_customer_message'));
+        add_filter('woocommerce_login_redirect', array($this, 'custom_login_redirect'), 10, 2);
     }
 
 
@@ -710,6 +711,19 @@ class Integrity_Mp_Quote_Customer_Account
         }
     }
 
+
+    /**
+     * Modifies the default login redirect URL to redirect to the shop page
+     *
+     * @param string $redirect The default redirect URL
+     * @param WP_User $user The user object
+     * @return string The modified redirect URL
+     */
+    public function custom_login_redirect($redirect, $user)
+    {
+        $shop_page_url = get_permalink(wc_get_page_id('shop'));
+        return $shop_page_url;
+    }
 
 
     /**
