@@ -111,10 +111,11 @@ class Integrity_Mp_Quote_Customer_Account
                 'class'       => ['form-row-last'],
             ],
             'shipping_country' => [
-                'type'        => 'country',
-                'label'       => __('Country', 'woocommerce'),
-                'required'    => true,
-                'class'       => ['form-row-first wc-enhanced-select'],
+                'type'              => 'country',
+                'label'             => __('Country', 'woocommerce'),
+                'required'          => true,
+                'custom_attributes' => ['disabled' => 'disabled'],
+                'class'             => ['form-row-first wc-enhanced-select'],
             ],
             'shipping_state' => [
                 'type'        => 'state',
@@ -131,8 +132,12 @@ class Integrity_Mp_Quote_Customer_Account
 
 
         foreach ($fields as $key => $field) {
-            $value = isset($_POST[$key]) ? sanitize_text_field($_POST[$key]) : '';
-            woocommerce_form_field($key, $field, $value);
+            if ($key === 'shipping_country') {
+                woocommerce_form_field($key, $field, 'US');
+            } else {
+                $value = isset($_POST[$key]) ? sanitize_text_field($_POST[$key]) : '';
+                woocommerce_form_field($key, $field, $value);
+            }
         }
     }
 
