@@ -122,18 +122,19 @@ class Integrity_Mp_Quote_Customer_Account
                 'required'    => true,
                 'class'       => ['form-row-last'],
             ],
-            'shipping_country' => [
-                'type'              => 'country',
-                'label'             => __('Country', 'woocommerce'),
-                'required'          => true,
-                // 'custom_attributes' => ['disabled' => 'disabled'],
-                'class'             => ['form-row-first wc-enhanced-select'],
-            ],
+            // 'shipping_country' => [
+            //     'type'              => 'country',
+            //     'label'             => __('Country', 'woocommerce'),
+            //     'required'          => true,
+            //     'custom_attributes' => ['disabled' => 'disabled'],
+            //     'class'             => ['form-row-first wc-enhanced-select'],
+            // ],
             'shipping_state' => [
                 'type'        => 'state',
                 'label'       => __('State', 'woocommerce'),
                 'required'    => true,
-                'class'       => ['form-row-last wc-enhanced-select'],
+                'coutry'      => 'US',
+                'class'       => ['wc-enhanced-select'],
             ],
             'shipping_phone' => [
                 'type'        => 'tel',
@@ -144,12 +145,8 @@ class Integrity_Mp_Quote_Customer_Account
 
 
         foreach ($fields as $key => $field) {
-            if ($key === 'shipping_country') {
-                woocommerce_form_field($key, $field, 'US');
-            } else {
-                $value = isset($_POST[$key]) ? sanitize_text_field($_POST[$key]) : '';
-                woocommerce_form_field($key, $field, $value);
-            }
+            $value = isset($_POST[$key]) ? sanitize_text_field($_POST[$key]) : '';
+            woocommerce_form_field($key, $field, $value);
         }
     }
 
@@ -216,7 +213,7 @@ class Integrity_Mp_Quote_Customer_Account
             'job_title',
             'shipping_city',
             'shipping_postcode',
-            'shipping_country',
+            // 'shipping_country',
             'shipping_state',
             'shipping_phone',
         ];
@@ -232,6 +229,7 @@ class Integrity_Mp_Quote_Customer_Account
                 }
             }
         }
+        update_user_meta($customer_id, 'shipping_country', 'US');
     }
 
 
@@ -246,7 +244,7 @@ class Integrity_Mp_Quote_Customer_Account
             'job_title'           => __('Job Title', 'woocommerce'),
             'shipping_city'       => __('City', 'woocommerce'),
             'shipping_postcode'   => __('Postcode', 'woocommerce'),
-            'shipping_country'    => __('Country', 'woocommerce'),
+            // 'shipping_country'    => __('Country', 'woocommerce'),
             'shipping_state'      => __('State', 'woocommerce'),
             'shipping_phone'      => __('Phone', 'woocommerce'),
         ];
