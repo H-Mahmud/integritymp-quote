@@ -167,6 +167,7 @@ function imq_quote_email($quote_id)
                     $full_name = $shipping->get_full_name();
                     $address_1 = $shipping->get_address_1();
                     $address_2 = $shipping->get_address_2();
+                    $address_2_text = $address_2 ? '<br> ' . $address_2 : '';
                     $state_address = $shipping->get_state_address();
 
                     echo <<<HTML
@@ -176,8 +177,7 @@ function imq_quote_email($quote_id)
                             $full_name
                             <br>
                             $address_1
-                            <br>
-                            $address_2
+                            $address_2_text
                             <br>
                             $state_address
                         </td>
