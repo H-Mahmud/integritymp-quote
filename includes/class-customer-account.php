@@ -705,7 +705,7 @@ class Integrity_Mp_Quote_Customer_Account
      */
     public function apply_woocommerce_restrictions()
     {
-        if (is_shop() || is_product_category() || is_product() || is_cart() || is_checkout() || is_page('product-categories')) {
+        if (is_shop() || is_product_category() || is_product() || is_cart() || is_checkout() || is_page('saved-list') || is_page('browsing-history') || is_page('department')) {
             $this->restrict_woocommerce_to_verified_users();
         }
     }
