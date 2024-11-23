@@ -54,6 +54,7 @@ class Integrity_Mp_Quote_Customer_Account
         add_action('woocommerce_product_query', array($this, 'hide_woocommerce_categories'), 10, 1);
         add_action('wp_head', array($this, 'show_unverified_customer_message'));
         add_filter('woocommerce_login_redirect', array($this, 'custom_login_redirect'), 10, 2);
+        add_filter('woocommerce_customer_meta_fields', array($this, 'add_custom_shipping_fields_to_woocommerce'));
     }
 
 
@@ -627,6 +628,37 @@ class Integrity_Mp_Quote_Customer_Account
 <?php
     }
 
+
+
+
+    /**
+     * Adds custom shipping fields to the WooCommerce customer meta fields.
+     *
+     * @since 1.0.0
+     *
+     * @param array $fields The existing customer meta fields.
+     * @return array The modified customer meta fields with custom fields added.
+     */
+    public function add_custom_shipping_fields_to_woocommerce($fields)
+    {
+        $fields['shipping']['fields']['position'] = array(
+            'label'       => __('Position', 'textdomain'),
+            'description' => __('Enter the position for the shipping address.', 'textdomain'),
+            'type'        => 'text',
+            'description_tip' => true,
+            'required'    => false,
+        );
+
+        $fields['shipping']['fields']['job_title'] = array(
+            'label'       => __('Job Title', 'textdomain'),
+            'description' => __('Enter the job title for the shipping address.', 'textdomain'),
+            'type'        => 'text',
+            'description_tip' => true,
+            'required'    => false,
+        );
+
+        return $fields;
+    }
 
 
     /**
