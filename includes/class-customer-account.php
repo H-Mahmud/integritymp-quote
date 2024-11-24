@@ -88,17 +88,10 @@ class Integrity_Mp_Quote_Customer_Account
                 'label'       => __('Business Name', 'woocommerce'),
                 'required'    => true,
             ],
-            'position'          => [
-                'type'        => 'text',
-                'label'       => __('Position', 'woocommerce'),
-                'required'    => true,
-                'class'       => ['form-row-first'],
-            ],
             'job_title'         => [
                 'type'        => 'text',
                 'label'       => __('Job Title', 'woocommerce'),
                 'required'    => true,
-                'class'       => ['form-row-last'],
             ],
             'shipping_address_1' => [
                 'type'        => 'text',
@@ -211,7 +204,6 @@ class Integrity_Mp_Quote_Customer_Account
             'shipping_address_1',
             'shipping_address_2',
             'shipping_company',
-            'position',
             'job_title',
             'shipping_city',
             'shipping_postcode',
@@ -242,7 +234,6 @@ class Integrity_Mp_Quote_Customer_Account
             'shipping_last_name'  => __('Last Name', 'woocommerce'),
             'shipping_address_1'  => __('Address Line 1', 'woocommerce'),
             'shipping_company'    => __('Business Name', 'woocommerce'),
-            'position'            => __('Position', 'woocommerce'),
             'job_title'           => __('Job Title', 'woocommerce'),
             'shipping_city'       => __('City', 'woocommerce'),
             'shipping_postcode'   => __('Postcode', 'woocommerce'),
@@ -641,13 +632,6 @@ class Integrity_Mp_Quote_Customer_Account
      */
     public function add_custom_shipping_fields_to_woocommerce($fields)
     {
-        $fields['shipping']['fields']['position'] = array(
-            'label'       => __('Position', 'textdomain'),
-            'description' => __('Enter the position for the shipping address.', 'textdomain'),
-            'type'        => 'text',
-            'description_tip' => true,
-            'required'    => false,
-        );
 
         $fields['shipping']['fields']['job_title'] = array(
             'label'       => __('Job Title', 'textdomain'),
