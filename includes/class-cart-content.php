@@ -51,7 +51,7 @@ class IMQ_Cart_Content
                 </div>
                 <div class="steps__step step-2">
                     <div class="steps__step-number"></div>
-                    <div class="steps__step-name">Print to PDF <br> or ee can Email it to You</div>
+                    <div class="steps__step-name">Print to PDF <br> or We can Email it to You</div>
                 </div>
                 <div class="steps__step step-3">
                     <div class="steps__step-number"></div>
