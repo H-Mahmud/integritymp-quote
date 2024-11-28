@@ -48,6 +48,7 @@ class Integrity_Mp_Quote_Product
 
         add_action('woocommerce_after_shop_loop_item', array($this, 'shop_page_add_quantity_field'), 11);
         add_action('init', array($this,  'shop_page_quantity_add_to_cart_handler'));
+        add_filter('term_link', array($this,  'custom_woocommerce_category_links'), 10, 3);
     }
 
 
@@ -545,6 +546,26 @@ class Integrity_Mp_Quote_Product
         ');
     }
 
+    /**
+     * Customizes the links for product categories so that they point to the shop page with the category
+     * as a query parameter.
+     *
+     * @param string $link The link URL.
+     * @param object $term The term object.
+     * @param string $taxonomy The taxonomy slug.
+     *
+     * @return string The modified link URL.
+     */
+    public function custom_woocommerce_category_links($link, $term, $taxonomy)
+    {
+        if ($taxonomy === 'product_cat') {
+            // Get the term ID
+            $term_id = $term->term_id;
+            // Create the custom URL
+            $link = add_query_arg(['category[]' => $term_id], get_permalink(wc_get_page_id('shop')));
+        }
+        return $link;
+    }
 
     /**
      * Gets the singleton instance of the class.
