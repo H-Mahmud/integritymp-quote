@@ -308,26 +308,33 @@ class Integrity_Mp_Quote_Product
         return $image_urls;
     }
 
+
     /**
-     * Retrieves the URL of an attachment by its filename, by querying the database directly for performance.
+     * Retrieves the URL of an attachment by its filename, or the first attachment that matches it with a numerical suffix appended.
      *
-     * @param string $filename The filename of the attachment to retrieve the URL for.
+     * @param string $filename The filename of the attachment to look up.
      *
-     * @return string|false The URL of the attachment if found, otherwise false.
+     * @return string|false The URL of the attachment, or false if no match is found.
      */
     private function get_attachment_url_by__filename($filename)
     {
         global $wpdb;
 
-        $attachment_id = $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_imq_filename' AND meta_value = %s",
-                sanitize_file_name($filename)
-            )
-        );
+        $filename = sanitize_file_name($filename);
 
-        if ($attachment_id) {
-            return wp_get_attachment_url($attachment_id);
+        for ($i = 0; $i <= 5; $i++) {
+            $attempted_filename = ($i === 0) ? $filename : preg_replace('/(\.[a-zA-Z0-9]+)$/', "-{$i}$1", $filename);
+
+            $attachment_id = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_imq_filename' AND meta_value = %s",
+                    $attempted_filename
+                )
+            );
+
+            if ($attachment_id) {
+                return wp_get_attachment_url($attachment_id);
+            }
         }
 
         return false;
