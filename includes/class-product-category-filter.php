@@ -53,7 +53,20 @@ class IMQ_Product_Category_Filter
 
         $current_url = home_url(add_query_arg(null, null));
         if ($categories && !is_wp_error($categories)) :
+
             $output = '<form id="imq-category-filter-form" method="get" action="' . esc_url($current_url) . '">';
+            if (!empty($_GET)) {
+                $shop_url = get_permalink(wc_get_page_id('shop'));
+
+                $button_html = '<div class="clear-filters-container">';
+                $button_html .= '<a href="' . esc_url($shop_url) . '" class="clear-filters">';
+                $button_html .= 'Clear Filters';
+                $button_html .= '</a>';
+                $button_html .= '</div>';
+
+                $output .= $button_html;
+            }
+
             $output .= '<ul>';
 
             $output .= $this->build_category_list($categories);
@@ -150,6 +163,19 @@ class IMQ_Product_Category_Filter
             });
         </script>
         <style>
+            .clear-filters-container {
+                margin-bottom: 24px;
+            }
+
+            .clear-filters-container .clear-filters {
+                background-color: #4981C6;
+                color: white;
+                padding: 10px 20px;
+                text-decoration: none;
+                border-color: #4981C6;
+                border-radius: 5px;
+            }
+
             #imq-category-filter-form {
                 padding: 15px;
                 /* border: 1px solid #ddd; */
@@ -168,11 +194,12 @@ class IMQ_Product_Category_Filter
 
             #imq-category-filter-form input[type="submit"] {
                 padding: 8px 16px;
-                background-color: #007cba;
+                background-color: #4981C6;
                 color: white;
                 border: none;
                 cursor: pointer;
                 margin-top: 10px;
+                display: none;
             }
 
             #imq-category-filter-form input[type="submit"]:hover {
