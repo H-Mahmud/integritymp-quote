@@ -49,6 +49,7 @@ class Integrity_Mp_Quote_Product
         add_action('woocommerce_after_shop_loop_item', array($this, 'shop_page_add_quantity_field'), 11);
         add_action('init', array($this,  'shop_page_quantity_add_to_cart_handler'));
         add_filter('term_link', array($this,  'custom_woocommerce_category_links'), 10, 3);
+        add_filter('posts_search', array($this, 'wc_search_by_sku'), 10, 2);
     }
 
 
@@ -559,13 +560,45 @@ class Integrity_Mp_Quote_Product
     public function custom_woocommerce_category_links($link, $term, $taxonomy)
     {
         if ($taxonomy === 'product_cat') {
-            // Get the term ID
             $term_id = $term->term_id;
-            // Create the custom URL
             $link = add_query_arg(['category[]' => $term_id], get_permalink(wc_get_page_id('shop')));
         }
         return $link;
     }
+
+    /**
+     * Modifies the WP_Query search SQL to search for the search term in the SKU
+     * of products.
+     *
+     * @param string   $search    The search SQL.
+     * @param WP_Query $wp_query  The WP_Query object.
+     *
+     * @return string The modified search SQL.
+     */
+
+    public function wc_search_by_sku($search, $wp_query)
+    {
+        global $wpdb;
+
+        if (! is_admin() && isset($wp_query->query_vars['s']) && ! empty($wp_query->query_vars['s'])) {
+            $search_term = esc_sql($wp_query->query_vars['s']);
+
+            $search .= $wpdb->prepare(
+                " OR ( 
+                {$wpdb->posts}.ID IN (
+                    SELECT post_id 
+                    FROM {$wpdb->postmeta} 
+                    WHERE meta_key = '_sku' 
+                    AND meta_value LIKE '%%%s%%'
+                )
+            )",
+                $search_term
+            );
+        }
+
+        return $search;
+    }
+
 
     /**
      * Gets the singleton instance of the class.
