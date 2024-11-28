@@ -90,15 +90,16 @@ class IMQ_Product_Category_Filter
 
                 $checked = isset($_GET['category']) && in_array($category->term_id, (array) $_GET['category']) ? 'checked' : '';
 
+
                 $output .= '<li class="category-item">';
-                $output .= '<label class="category-label">';
+                $output .= '<div class="category-label">';
 
                 $has_children = $this->category_has_children($category->term_id, $categories);
-                $arrow = $has_children ? '<span class="expand-collapse" data-category="' . $category->term_id . '"><span class="imq-arrow"></span>' : '';
+                $arrow = $has_children ? '<span class="expand-collapse " data-category="' . $category->term_id . '"><span class="imq-arrow "></span>' : '';
 
                 $output .= $arrow;
-                $output .= '<input type="checkbox" name="category[]" value="' . esc_attr($category->term_id) . '" ' . $checked . ' /> ';
-                $output .= esc_html($category->name) . ' (' . $product_count . ')';
+                $output .= '<label><input type="checkbox" name="category[]" value="' . esc_attr($category->term_id) . '" ' . $checked . ' /> ';
+                $output .= esc_html($category->name) . ' (' . $product_count . ')</label>';
 
                 if ($has_children) {
                     $output .= '<ul class="subcategories" id="category-' . $category->term_id . '">';
@@ -106,7 +107,7 @@ class IMQ_Product_Category_Filter
                     $output .= '</ul>';
                 }
 
-                $output .= '</label>';
+                $output .= '</div>';
                 $output .= '</li>';
             }
         }
@@ -133,6 +134,18 @@ class IMQ_Product_Category_Filter
                     const $subcategoryList = $('#category-' + categoryId);
                     $subcategoryList.slideToggle();
                     $arrow.toggleClass('close');
+                });
+
+                $('.subcategories input[type="checkbox"]').each(function() {
+                    const isChecked = $(this).is(':checked');
+                    if (isChecked) {
+                        $(this).closest('.subcategories').toggle('close');
+                    }
+
+                })
+
+                $('#imq-category-filter-form input[type="checkbox"]').on('change', function() {
+                    $('#imq-category-filter-form').submit();
                 });
             });
         </script>
@@ -179,10 +192,12 @@ class IMQ_Product_Category_Filter
             #imq-category-filter-form .subcategories {
                 list-style-type: none;
                 padding-left: 20px;
+                display: none;
             }
 
             #imq-category-filter-form span.imq-arrow {
                 position: absolute;
+                display: inline-block;
                 left: -20px;
                 top: 2px;
                 background-image: url('data:image/svg+xml,<svg height="800" width="800" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 511.787 511.787" xml:space="preserve"><path d="M508.667 125.707a10.623 10.623 0 0 0-15.04 0L255.76 363.573 18 125.707c-4.267-4.053-10.987-3.947-15.04.213a10.763 10.763 0 0 0 0 14.827L248.293 386.08a10.623 10.623 0 0 0 15.04 0l245.333-245.333c4.161-4.054 4.161-10.88.001-15.04z"/></svg>');
